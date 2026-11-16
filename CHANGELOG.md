@@ -2,6 +2,15 @@
 
 Tutti gli aggiornamenti dell'app Granchio Blu (versione con accesso Google), dal più recente.
 
+## Versione 3.3 — 16 novembre 2026
+
+### Aggiunto
+- **Grafico di confronto** nella sezione *Anni*: i chili accumulati dall'inizio dell'anno, una linea per anno. Scorrendo col dito sul grafico si leggono i valori di ogni anno a quella data.
+
+### Corretto
+- **Esportazione in Excel:** non funzionava. Ora il file viene creato direttamente dall'app, anche senza rete, e contiene quattro colonne: giorno, chili, prezzo €/kg e incasso (le ultime due solo nei giorni con il prezzo), più la riga del totale.
+- I numeri nei riquadri di riepilogo (*Oggi*, *Uscite*) ora sono centrati.
+
 ## Versione 3.2 — 16 novembre 2026
 
 ### Aggiunto
