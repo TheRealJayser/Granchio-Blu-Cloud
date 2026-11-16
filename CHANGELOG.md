@@ -2,6 +2,15 @@
 
 Tutti gli aggiornamenti dell'app Granchio Blu (versione con accesso Google), dal più recente.
 
+## Versione 3.2 — 16 novembre 2026
+
+### Aggiunto
+- **Questa settimana** nella Home: i chili della settimana in corso confrontati con la settimana scorsa (anche "a pari giorno", cioè fino allo stesso giorno della settimana) e con la stessa settimana dell'anno prima.
+- **Vista Settimane** nella sezione *Uscite*: accanto a *Giorni* si può scegliere *Settimane* per vedere ogni settimana dell'anno con chili, uscite, media, incasso e la differenza rispetto alla settimana prima. Le settimane vanno da lunedì a domenica.
+
+### Modificato
+- Nel tema scuro torna lo **sfondo blu scuro** della prima versione, al posto del nero.
+
 ## Versione 3.1 — 16 novembre 2026
 
 Nuova grafica in stile iOS, con animazioni e personalizzazione.
