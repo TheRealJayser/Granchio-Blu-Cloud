@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Granchio Blu">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b1320" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>Granchio Blu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: calmo, pratico, da strumento di lavoro in barca: pochi numeri grandi e leggibili.
+   IDEA: il libretto delle pesate al banco del mercato ittico, una riga per ogni uscita.
+   PICTURE: la fascia blu col totale dell'anno, poi le barre del confronto anno per anno.
+   COLOUR and TYPE: bianco, blu granchio #1b5fd0 dominante, inchiostro #0d1b2e, accento corallo #ff5a36 (le punte delle chele); Figtree.
+   LAYOUT: colonna unica da telefono, max 560px, barra fissa in basso con il + al centro e il menu a destra. */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#0b1320);--ink:light-dark(#0d1b2e,#e8eef8);--mute:light-dark(#5b6b80,#93a3b8);
+--line:light-dark(#e4e9f1,#1d2a3d);--card:light-dark(#f4f7fb,#111c2d);--blue:#1b5fd0;--blue2:light-dark(#dce8fb,#17325c);
+--coral:#ff5a36;--pos:light-dark(#0f7a4a,#4fd39a);--neg:light-dark(#c2361b,#ff8a70)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Figtree,system-ui,-apple-system,sans-serif;overflow-x:clip;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:560px;margin:0 auto;padding:0 max(18px,env(safe-area-inset-right)) 130px max(18px,env(safe-area-inset-left))}
+html,body{overscroll-behavior-y:none}
+header{display:flex;justify-content:space-between;align-items:baseline;padding:calc(22px + env(safe-area-inset-top)) 0 14px}
+header h1{font-size:22px;font-weight:800;margin:0;letter-spacing:-.01em}
+header span{color:var(--mute);font-size:14px}
+.hero{background:var(--blue);color:#fff;border-radius:24px;padding:22px 22px 20px;position:relative;overflow:hidden}
+.hero svg.claw{position:absolute;right:-18px;top:-10px;width:150px;height:150px;opacity:.16}
+.hero .lab{font-size:15px;opacity:.85}
+.hero .big{font-size:clamp(40px,12vw,56px);font-weight:800;line-height:1.05;margin:4px 0 6px;letter-spacing:-.02em;white-space:nowrap}
+.hero .big small{font-size:.45em;font-weight:600;opacity:.85;margin-left:4px}
+.hero .sub{font-size:15px;opacity:.92}
+.chip[hidden]{display:none}.chip{display:inline-block;margin-top:12px;padding:5px 11px;border-radius:99px;background:rgba(255,255,255,.18);font-size:14px;font-weight:600}
+h2{font-size:17px;font-weight:700;margin:28px 0 10px}
+h2 em{font-style:normal;color:var(--mute);font-weight:500}
+.today{background:var(--card);border-radius:20px;padding:16px 18px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.today div b{display:block;font-size:24px;font-weight:800;white-space:nowrap}
+.today div span{font-size:13px;color:var(--mute)}
+.today.empty{display:flex;justify-content:space-between;align-items:center;gap:12px;color:var(--mute)}
+.today.empty button{flex:none}
+.yr{display:grid;grid-template-columns:54px minmax(0,1fr) auto;gap:4px 12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.yr .y{font-weight:700}
+.yr .bar{height:12px;background:var(--blue2);border-radius:6px;overflow:hidden}
+.yr .bar i{display:block;height:100%;background:var(--blue);border-radius:6px}
+.yr.cur .bar i{background:var(--coral)}
+.yr .v{text-align:right;font-weight:700;white-space:nowrap}
+.yr .d{grid-column:2/4;font-size:13px;color:var(--mute);display:flex;justify-content:space-between;gap:8px}
+.up{color:var(--pos);font-weight:600}.dn{color:var(--neg);font-weight:600}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding:12px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.row:active{background:var(--card)}
+.row .dt{font-weight:600}.row .kg{text-align:right;font-weight:700;white-space:nowrap}
+.row .pr{font-size:13px;color:var(--mute)}.row .eu{font-size:13px;color:var(--mute);text-align:right;white-space:nowrap}
+.none{color:var(--mute);padding:14px 0}
+.note{font-size:13px;color:var(--mute);text-align:center;margin-top:22px}
+.dock{position:fixed;left:0;right:0;bottom:0;padding:12px 18px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 35%);pointer-events:none;z-index:5}
+.dock .in{max-width:560px;margin:0 auto;position:relative;height:72px}
+.fab{pointer-events:auto;position:absolute;left:50%;top:0;transform:translateX(-50%);width:72px;height:72px;border-radius:50%;border:0;background:var(--coral);color:#fff;box-shadow:0 8px 22px rgba(255,90,54,.4);cursor:pointer;display:grid;place-items:center}
+.menu{pointer-events:auto;position:absolute;left:0;top:12px;width:56px;height:56px;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--ink);box-shadow:0 4px 14px rgba(13,27,46,.12);cursor:pointer;display:grid;place-items:center}
+button{font:inherit}
+.btn{min-height:48px;padding:0 20px;border-radius:14px;border:0;background:var(--blue);color:#fff;font-weight:700;cursor:pointer}
+.btn.ghost{background:var(--card);color:var(--ink)}.btn:disabled{opacity:.45;cursor:default}
+.btn.red{background:transparent;color:var(--neg);border:1px solid var(--line)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--coral);outline-offset:2px}
+.scrim{position:fixed;inset:0;background:rgba(5,12,24,.45);z-index:10;display:none}
+.scrim.on{display:block}
+.sheet{position:fixed;left:0;right:0;bottom:0;width:100%;z-index:11;background:var(--bg);border-radius:24px 24px 0 0;padding:10px 20px calc(20px + env(safe-area-inset-bottom));max-width:560px;margin:0 auto;transform:translateY(105%);transition:transform .25s ease}
+.sheet.on{transform:none}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 12px}
+.sheet h3{margin:0 0 14px;font-size:20px}
+label{display:block;font-size:14px;color:var(--mute);margin:12px 0 6px}
+input,select,textarea{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px;min-height:50px}
+input[type=date]{-webkit-appearance:none;appearance:none;display:block;width:100%;max-width:100%;min-width:0;text-align:left}
+input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
+input[type=date]::-webkit-calendar-picker-indicator{margin:0}
+.sheet{overflow-x:hidden}.sheet *{max-width:100%}
+input.huge{font-size:28px;font-weight:800;padding:10px 14px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.tot{margin:16px 0;padding:14px;border-radius:14px;background:var(--blue2);display:flex;justify-content:space-between;font-weight:700}
+.acts{display:flex;gap:10px;margin-top:8px}.acts .btn{flex:1}
+.err{color:var(--neg);font-size:14px;min-height:20px;margin-top:6px}
+.page{position:fixed;inset:0;z-index:9;background:var(--bg);overflow-y:auto;display:none}
+.page.on{display:block}
+.page .top{position:sticky;top:0;background:var(--bg);z-index:2;padding:calc(18px + env(safe-area-inset-top)) 18px 0;max-width:560px;margin:0 auto}
+.page .top .h{display:flex;justify-content:space-between;align-items:center}
+.page .top h1{margin:0;font-size:24px;font-weight:800}
+.x{width:44px;height:44px;border-radius:50%;border:0;background:var(--card);color:var(--ink);cursor:pointer;font-size:22px}
+.tabs{display:flex;gap:6px;margin:14px 0 0;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.tabs button{flex:1;padding:0 4px;font-size:15px;min-height:44px;border-radius:12px;border:0;background:transparent;color:var(--mute);font-weight:600;cursor:pointer}
+.tabs button.on{background:var(--blue2);color:var(--ink)}
+.mo{display:flex;justify-content:space-between;margin:22px 4px 4px;font-weight:700}
+.mo span{color:var(--mute);font-weight:500;font-size:14px}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{padding:12px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th{font-size:13px;color:var(--mute);font-weight:600}th:first-child,td:first-child{text-align:left}
+td:first-child{font-weight:700}
+.opts{display:grid;gap:10px}.opt{display:flex;justify-content:space-between;align-items:center;min-height:64px;padding:0 18px;border-radius:16px;border:2px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-align:left}.opt b{font-size:18px}.opt span{color:var(--mute);font-size:14px}.opt.on{border-color:var(--blue);background:var(--blue2)}
+.bk p{color:var(--mute);font-size:15px}
+.bk textarea{min-height:120px;font-size:13px;font-family:ui-monospace,Menlo,monospace}
+.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:15px;z-index:20;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+.login{position:fixed;inset:0;z-index:30;background:var(--bg);display:none;overflow-y:auto}
+.login.on{display:block}
+.login .in{max-width:440px;margin:0 auto;padding:calc(40px + env(safe-area-inset-top)) 22px 40px;display:flex;flex-direction:column;gap:18px;min-height:100%}
+.login .hero{margin-top:10px}
+.login p{color:var(--mute);margin:0}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:12px;min-height:56px;border-radius:16px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-weight:700;font-size:17px;cursor:pointer;box-shadow:0 4px 14px rgba(13,27,46,.08)}
+.gbtn:disabled{opacity:.5;cursor:default}
+.acct{display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;background:var(--card)}
+.acct img{width:44px;height:44px;border-radius:50%;flex:none}
+.acct div{flex:1}.acct b{display:block}.acct span{font-size:14px;color:var(--mute);word-break:break-all}
+@media(prefers-reduced-motion:reduce){.sheet{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><h1>Granchio Blu</h1><span id="todayLbl"></span></header>
+  <section class="hero" aria-live="polite">
+    <svg class="claw" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 92c-6-18-4-34 6-46-14-2-24-12-26-28 10 6 20 8 30 6-4-8-4-16 0-22 6 10 16 16 28 16-2 16-12 28-26 32 6 12 6 26 0 42z" fill="#fff"/></svg>
+    <div class="lab" id="heroLab">Totale dell'anno fino a oggi</div>
+    <div class="big" id="heroKg">0<small>kg</small></div>
+    <div class="sub" id="heroSub">Nessuna uscita registrata</div>
+    <div class="chip" id="heroChip" hidden></div>
+  </section>
+
+  <h2>Oggi</h2>
+  <div id="today"></div>
+
+  <h2 id="cmpTitle">Confronto alla stessa data</h2>
+  <div id="cmp"></div>
+
+  <h2>Ultime uscite</h2>
+  <div id="recent"></div>
+  <div class="note" id="status">Caricamento…</div>
+</div>
+
+<div class="dock"><div class="in">
+  <button class="fab" id="addBtn" aria-label="Aggiungi pescato"><svg width="34" height="34" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
+  <button class="menu" id="menuBtn" aria-label="Apri menu"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+</div></div>
+
+<div class="scrim" id="scrim"></div>
+<form class="sheet" id="sheet" novalidate>
+  <div class="grab"></div>
+  <h3 id="shTitle">Nuovo pescato</h3>
+  <label for="fDate">Giorno</label>
+  <input type="date" id="fDate" required>
+  <div class="two">
+    <div><label for="fKg">Chili pescati</label><input class="huge" id="fKg" inputmode="decimal" placeholder="0" autocomplete="off"></div>
+    <div><label for="fPr">Prezzo €/kg (se lo sai)</label><input class="huge" id="fPr" inputmode="decimal" placeholder="0,00" autocomplete="off"></div>
+  </div>
+  <div class="tot"><span>Incasso del giorno</span><span id="fTot">0,00 €</span></div>
+  <div class="err" id="fErr"></div>
+  <div class="acts">
+    <button type="button" class="btn red" id="fDel" hidden>Elimina</button>
+    <button type="button" class="btn ghost" id="fCancel">Annulla</button>
+    <button type="submit" class="btn" id="fSave">Salva</button>
+  </div>
+</form>
+
+<div class="page" id="page">
+  <div class="top">
+    <div class="h"><h1>Archivio</h1><button class="x" id="pgClose" aria-label="Chiudi">×</button></div>
+    <div class="tabs" role="tablist">
+      <button class="on" data-t="days">Giorni</button>
+      <button data-t="years">Anni</button>
+      <button data-t="backup">Backup</button>
+      <button data-t="set">Impostazioni</button>
+    </div>
+  </div>
+  <div class="wrap" id="pgBody" style="padding-top:6px"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<div class="login" id="login"><div class="in">
+  <section class="hero">
+    <svg class="claw" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 92c-6-18-4-34 6-46-14-2-24-12-26-28 10 6 20 8 30 6-4-8-4-16 0-22 6 10 16 16 28 16-2 16-12 28-26 32 6 12 6 26 0 42z" fill="#fff"/></svg>
+    <div class="lab">Benvenuto in</div>
+    <div class="big" style="font-size:40px">Granchio Blu</div>
+    <div class="sub">Il registro del pescato, sempre al sicuro.</div>
+  </section>
+  <p>Accedi con il tuo account Google: il pescato viene salvato nel tuo account e lo ritrovi su qualsiasi telefono. Funziona anche senza campo, i dati partono appena torna la rete.</p>
+  <button class="gbtn" id="gLogin" type="button" disabled><svg width="22" height="22" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg><span>Accedi con Google</span></button>
+  <div class="err" id="lErr" role="alert"></div>
+</div></div>
+
+<script type="module">
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+import {getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,onAuthStateChanged,signOut} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,setDoc,deleteDoc,writeBatch,onSnapshot} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+{
+/* ---- Firebase ---- */
+// Su Netlify l'accesso passa dallo stesso dominio dell'app (vedi _redirects), così funziona anche su iPhone.
+const onNetlify=location.hostname.endsWith('.netlify.app');
+const fbApp=initializeApp({
+  apiKey:'AIzaSyC1Pc5ftVMTIPdT0sGpDNV3dNKS63bEcVE',
+  authDomain:onNetlify?location.host:'granchio-blu.firebaseapp.com',
+  projectId:'granchio-blu',
+  storageBucket:'granchio-blu.firebasestorage.app',
+  messagingSenderId:'840920901888',
+  appId:'1:840920901888:web:3579c0189bdaae98c22be5'
+});
+const auth=getAuth(fbApp);auth.languageCode='it';
+let fs;try{fs=initializeFirestore(fbApp,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})})}catch(e){fs=initializeFirestore(fbApp,{})}
+
+const $=id=>document.getElementById(id);
+const MESI=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+const nf1=new Intl.NumberFormat('it-IT',{maximumFractionDigits:1});
+const nf2=new Intl.NumberFormat('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
+const eur=v=>nf2.format(v)+' €';
+const nfq=new Intl.NumberFormat('it-IT',{maximumFractionDigits:2});
+let unit='kg';try{unit=localStorage.getItem('granchio-unita')==='q'?'q':'kg'}catch(e){}
+const numU=v=>unit==='q'?nfq.format(v/100):nf1.format(v);
+const uLab=()=>unit==='q'?'q':'kg';
+const kg=v=>numU(v)+' '+uLab();
+const pad=n=>String(n).padStart(2,'0');
+const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const nice=s=>{const [y,m,d]=s.split('-');return +d+' '+MESI[+m-1]+' '+y};
+const niceShort=s=>{const [,m,d]=s.split('-');return +d+' '+MESI[+m-1]};
+const wd=s=>new Date(s+'T12:00').toLocaleDateString('it-IT',{weekday:'short'});
+const num=v=>{v=String(v||'').trim().replace(/\s/g,'');if(v.includes(',')){v=v.replace(/\./g,'').replace(',','.')}const n=parseFloat(v);return isFinite(n)?n:NaN};
+let rows=new Map(), user=null, col=null, unsub=null, unsynced=false, readOnly=false, tab='days', yearSel=null;
+function valid(r){return r&&/^\d{4}-\d{2}-\d{2}$/.test(r.d)&&isFinite(r.kg)&&r.kg>0&&(r.p==null||isFinite(r.p))}
+const hasP=r=>r&&r.p!=null&&isFinite(r.p);
+const inc=r=>hasP(r)?r.kg*r.p:0;
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2200)}
+function sum(list){let k=0,e=0,kp=0;list.forEach(r=>{k+=r.kg;if(hasP(r)){e+=r.kg*r.p;kp+=r.kg}});return {k,e,n:list.length,avg:kp?e/kp:0,miss:list.filter(r=>!hasP(r)).length}}
+function sorted(){return [...rows.values()].sort((a,b)=>a.d<b.d?1:-1)}
+function years(){const s=new Set([...rows.keys()].map(d=>+d.slice(0,4)));s.add(new Date().getFullYear());return [...s].sort((a,b)=>b-a)}
+
+function render(){
+  const now=new Date(),t=iso(now),Y=now.getFullYear(),md=t.slice(5);
+  $('todayLbl').textContent=now.toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
+  const all=sorted();
+  const ytd=y=>all.filter(r=>r.d>=y+'-01-01'&&r.d<=y+'-'+md);
+  const cur=sum(ytd(Y));
+  $('heroLab').textContent='Totale '+Y+' fino a oggi';
+  $('heroKg').innerHTML=numU(cur.k)+'<small>'+(unit==='q'?'quintali':'kg')+'</small>';
+  $('heroSub').textContent=cur.n?cur.n+(cur.n==1?' uscita':' uscite')+' · media '+kg(cur.k/cur.n)+' a uscita':'Nessuna uscita registrata quest\'anno';
+  const prev=sum(ytd(Y-1)),chip=$('heroChip');
+  if(prev.k>0){const p=(cur.k-prev.k)/prev.k*100;chip.hidden=false;chip.textContent=(p>=0?'+':'')+nf1.format(p)+'% rispetto al '+(Y-1)+' alla stessa data'}else chip.hidden=true;
+
+  const td=rows.get(t),T=$('today');
+  if(td){T.className='today';T.innerHTML=`<div><b>${numU(td.kg)}</b><span>${unit==='q'?'quintali':'kg'}</span></div><div><b>${hasP(td)?nf2.format(td.p):'—'}</b><span>€/kg</span></div><div><b>${hasP(td)?nf2.format(inc(td)):'—'}</b><span>€ incasso</span></div>`;T.onclick=()=>openSheet(td)}
+  else{T.className='today empty';T.innerHTML='<span>Nessun pescato inserito oggi</span><button class="btn" type="button">Inserisci</button>';T.onclick=()=>openSheet()}
+
+  $('cmpTitle').innerHTML='Lo stesso giorno negli anni <em>· '+niceShort(t)+'</em>';
+  const ys=years(),data=ys.map(y=>({y,r:rows.get(y+'-'+md),tot:sum(ytd(y)).k})),mx=Math.max(1,...data.map(d=>d.r?d.r.kg:0));
+  $('cmp').innerHTML=data.length<2&&!td?'<div class="none">Il confronto comparirà quando ci saranno dati di più anni.</div>':data.map(d=>{
+    const k=d.r?d.r.kg:0;
+    const main=d.r?kg(k):'<span style="color:var(--mute);font-weight:500">nessuna uscita</span>';
+    const info=d.r?'':(d.y===Y?'non ancora inserito':'');
+    return `<div class="yr${d.y===Y?' cur':''}"><span class="y">${d.y}</span><div class="bar"><i style="width:${k/mx*100}%"></i></div><span class="v">${main}</span><div class="d"><span>${info}</span><span>totale al ${niceShort(t)}: ${kg(d.tot)}</span></div></div>`}).join('');
+
+  $('recent').innerHTML=all.length?all.slice(0,5).map(rowHtml).join(''):'<div class="none">Ancora nessuna uscita. Tocca il + per inserire la prima.</div>';
+  bindRows($('recent'));
+  if($('page').classList.contains('on'))renderPage();
+}
+function rowHtml(r){return `<div class="row" data-d="${r.d}" role="button" tabindex="0"><span class="dt">${wd(r.d)} ${nice(r.d)}</span><span class="kg">${kg(r.kg)}</span><span class="pr">${hasP(r)?nf2.format(r.p)+' €/kg':''}</span><span class="eu">${hasP(r)?eur(inc(r)):''}</span></div>`}
+function bindRows(el){el.querySelectorAll('.row').forEach(n=>{const go=()=>openSheet(rows.get(n.dataset.d));n.onclick=go;n.onkeydown=e=>{if(e.key==='Enter')go()}})}
+
+/* ---- inserimento ---- */
+let editing=null,delArm=false;
+function openSheet(r){
+  if(readOnly){toast('Puoi solo consultare i dati');return}
+  editing=r||null;delArm=false;
+  $('shTitle').textContent=r?'Modifica uscita':'Nuovo pescato';
+  $('fDate').value=r?r.d:iso(new Date());
+  $('fKg').value=r?String(r.kg).replace('.',','):'';
+  const lp=sorted().find(hasP);$('fPr').value=r?(hasP(r)?nf2.format(r.p):''):(lp?nf2.format(lp.p):'');
+  $('fDel').hidden=!r;$('fDel').textContent='Elimina';$('fErr').textContent='';
+  upTot();$('scrim').classList.add('on');$('sheet').classList.add('on');
+  setTimeout(()=>$('fKg').focus(),250);
+}
+function closeSheet(){$('scrim').classList.remove('on');$('sheet').classList.remove('on');editing=null}
+function upTot(){const k=num($('fKg').value),p=num($('fPr').value);$('fTot').textContent=eur(isFinite(k)&&isFinite(p)?k*p:0)}
+$('fKg').oninput=upTot;$('fPr').oninput=upTot;
+$('fDate').onchange=()=>{const ex=rows.get($('fDate').value);if(ex&&(!editing||editing.d!==ex.d)){$('fErr').textContent='Esiste già un\'uscita in questo giorno: salvando la sostituisci.'}else $('fErr').textContent=''};
+$('addBtn').onclick=()=>{openSheet();$('fDate').onchange()};
+$('fCancel').onclick=closeSheet;$('scrim').onclick=closeSheet;
+$('sheet').onsubmit=async e=>{
+  e.preventDefault();
+  const d=$('fDate').value,k=num($('fKg').value),p=num($('fPr').value);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d)){$('fErr').textContent='Scegli il giorno.';return}
+  if(!(k>0)){$('fErr').textContent='Inserisci i chili pescati.';return}
+  if($('fPr').value.trim()&&!(p>=0)){$('fErr').textContent='Il prezzo non è un numero valido.';return}
+  const r={d,kg:Math.round(k*100)/100,p:p>=0?Math.round(p*100)/100:null};
+  const old=editing;closeSheet();
+  if(old&&old.d!==d)await del(old.d,true);
+  await put(r);toast('Salvato: '+kg(r.kg)+' il '+niceShort(d));
+};
+$('fDel').onclick=async()=>{
+  if(!delArm){delArm=Date.now();$('fDel').textContent='Tocca ancora per eliminare';return}
+  if(Date.now()-delArm<800)return;
+  const d=editing.d;closeSheet();await del(d);toast('Uscita eliminata');
+};
+
+/* ---- archivio ---- */
+$('menuBtn').onclick=()=>{$('page').classList.add('on');renderPage()};
+$('pgClose').onclick=()=>$('page').classList.remove('on');
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));renderPage()});
+function renderPage(){
+  const B=$('pgBody'),all=sorted(),ys=years();
+  if(tab==='days'){
+    if(!ys.includes(yearSel))yearSel=ys[0];
+    const list=all.filter(r=>r.d.startsWith(yearSel+'-'));
+    const groups={};list.forEach(r=>(groups[r.d.slice(5,7)]=groups[r.d.slice(5,7)]||[]).push(r));
+    B.innerHTML=`<label for="ySel">Anno</label><select id="ySel">${ys.map(y=>`<option ${y===yearSel?'selected':''}>${y}</option>`).join('')}</select>`+
+      (list.length?Object.keys(groups).sort().reverse().map(m=>{const s=sum(groups[m]);return `<div class="mo">${MESI[+m-1][0].toUpperCase()+MESI[+m-1].slice(1)}<span>${kg(s.k)} · ${s.n} uscite</span></div>`+groups[m].map(rowHtml).join('')}).join(''):'<div class="none">Nessuna uscita in questo anno.</div>');
+    $('ySel').onchange=e=>{yearSel=+e.target.value;renderPage()};bindRows(B);
+  }else if(tab==='years'){
+    const data=ys.map(y=>({y,...sum(all.filter(r=>r.d.startsWith(y+'-')))})).filter(d=>d.n||d.y===new Date().getFullYear());
+    const best=Math.max(0,...data.map(d=>d.k));
+    B.innerHTML=`<table><thead><tr><th>Anno</th><th>Pescato</th><th>Uscite</th><th>Media a uscita</th></tr></thead><tbody>${data.map(d=>`<tr><td>${d.y}${d.k===best&&best>0?' <span style="color:var(--coral)">●</span>':''}</td><td>${kg(d.k)}</td><td>${d.n}</td><td>${d.n?kg(d.k/d.n):'—'}</td></tr>`).join('')}</tbody></table><p class="note">● anno migliore per chili pescati. Gli anni sono interi, dal 1° gennaio al 31 dicembre.</p>`;
+  }else if(tab==='set'){
+    const ph=user&&user.photoURL?`<img src="${esc(user.photoURL)}" alt="" referrerpolicy="no-referrer">`:'';
+    B.innerHTML=`<h2>Account</h2><div class="acct">${ph}<div><b>${esc(user?(user.displayName||'Account Google'):'')}</b><span>${esc(user?user.email||'':'')}</span></div></div><p class="none" style="padding-bottom:0">Il pescato è salvato in questo account. Su un telefono nuovo basta accedere con lo stesso account per ritrovare tutto.</p><div class="acts"><button type="button" class="btn ghost" id="outBtn">Esci</button></div>
+      <h2>Unità di misura</h2><p class="none" style="padding-top:0">Come mostrare il pescato in tutta l'app. I chili si inseriscono sempre in kg.</p><div class="opts">${[['kg','Chilogrammi','es. 1.250 kg'],['q','Quintali','es. 12,5 q']].map(o=>`<button type="button" class="opt${unit===o[0]?' on':''}" data-u="${o[0]}"><b>${o[1]}</b><span>${o[2]}</span></button>`).join('')}</div><h2>Esporta in Excel</h2><p class="none" style="padding-top:0">Un file .xlsx con due colonne: giorno e chili pescati (${rows.size} giorni). Sul telefono si apre la condivisione: scegli "Salva su File", Mail o WhatsApp. Fallo ogni tanto come copia di sicurezza.</p><div class="acts"><button type="button" class="btn" id="xlExp">Scarica file Excel</button></div><div class="err" id="xlExpErr"></div>
+      <h2>Elimina dati</h2><p class="none" style="padding-top:0">Puoi cancellare un giorno, un mese, un anno intero o tutto. Prima conviene scaricare il file Excel.</p>
+      <label for="delK">Cosa eliminare</label><select id="delK"><option value="">Scegli…</option><option value="d">Un giorno</option><option value="m">Un mese</option><option value="y">Un anno intero</option><option value="all">Tutti i dati (${rows.size} giorni)</option></select>
+      <div id="delWrap" hidden><label for="delY" id="delYLbl">Quale</label><select id="delY"></select></div>
+      <label for="delTxt">Per confermare scrivi ELIMINA</label><input id="delTxt" autocomplete="off" autocapitalize="characters" placeholder="ELIMINA">
+      <div class="acts"><button type="button" class="btn red" id="delGo" disabled>Elimina definitivamente</button></div><div class="err" id="delErr"></div>`;
+    $('xlExp').onclick=exportXlsx;
+    let outArm=false;
+    $('outBtn').onclick=async()=>{
+      if(unsynced&&!outArm){outArm=true;$('outBtn').textContent='Dati non ancora inviati: tocca ancora per uscire';return}
+      try{await signOut(auth)}catch(e){toast('Uscita non riuscita, riprova')}
+    };
+    const keys=()=>[...rows.keys()].sort().reverse();
+    const cnt=p=>keys().filter(d=>d.startsWith(p)).length;
+    const gg=n=>n+(n==1?' giorno':' giorni');
+    const target=()=>{const k=$('delK').value;return k==='all'?'all':(k&&$('delY').value)||''};
+    const chk=()=>{$('delGo').disabled=!(target()&&$('delTxt').value.trim().toUpperCase()==='ELIMINA')};
+    $('delK').onchange=()=>{
+      const k=$('delK').value;let opts=[];
+      if(k==='d')opts=keys().map(d=>{const r=rows.get(d);return [d,wd(d)+' '+nice(d)+' · '+kg(r.kg)]});
+      else if(k==='m')opts=[...new Set(keys().map(d=>d.slice(0,7)))].map(m=>{const n=MESI[+m.slice(5)-1];return [m+'-',n[0].toUpperCase()+n.slice(1)+' '+m.slice(0,4)+' ('+gg(cnt(m+'-'))+')']});
+      else if(k==='y')opts=[...new Set(keys().map(d=>d.slice(0,4)))].map(y=>[y+'-','Tutto il '+y+' ('+gg(cnt(y+'-'))+')']);
+      $('delYLbl').textContent=k==='d'?'Quale giorno':k==='m'?'Quale mese':'Quale anno';
+      $('delY').innerHTML='<option value="">Scegli…</option>'+opts.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('');
+      $('delWrap').hidden=!(k&&k!=='all');
+      if(k&&k!=='all'&&!opts.length)$('delY').innerHTML='<option value="">Nessun dato</option>';
+      chk();
+    };
+    $('delY').onchange=chk;$('delTxt').oninput=chk;
+    $('delGo').onclick=async()=>{
+      if(readOnly){$('delErr').textContent='Puoi solo consultare i dati.';return}
+      const t=target();if(!t)return;
+      const list=[...rows.keys()].filter(d=>t==='all'||(t.length===10?d===t:d.startsWith(t)));
+      $('delGo').disabled=true;$('delGo').textContent='Eliminazione…';
+      await many(list,'del');
+      render();toast(list.length==1?'1 giorno eliminato':list.length+' giorni eliminati');
+    };
+    B.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{unit=b.dataset.u;try{localStorage.setItem('granchio-unita',unit)}catch(e){}render();renderPage()});
+  }else{
+    const json=JSON.stringify(all.map(r=>({d:r.d,kg:r.kg,p:r.p})));
+    B.innerHTML=`<div class="bk"><h2>Importa da Excel</h2><p>Scegli il file Excel (.xlsx, .xls) o .csv. Scegli il file dei conferimenti. Leggo solo la data (colonna B), descrMateriaPrima (J) e qtaQuota (S); prendo tutte le righe tranne quelle di VONGOLE o SEMINAVONGOLE. Più righe nello stesso giorno vengono sommate.</p><input type="file" id="xlFile" accept=".xlsx,.xls,.xlsm,.ods,.csv"><div id="xlOut"></div>
+      <h2>Copia di sicurezza</h2><p>Copia questo testo e salvalo in una nota o mandalo per email: contiene tutte le uscite (${all.length}).</p><textarea id="exTxt" readonly>${json}</textarea><div class="acts"><button class="btn" id="cpBtn" type="button">Copia</button></div>
+      <h2>Ripristina o aggiungi dati</h2><p>Incolla qui un testo di backup, oppure scegli un file. Le uscite con lo stesso giorno vengono sostituite.</p><textarea id="imTxt" placeholder='[{"d":"2025-06-12","kg":38.5,"p":6.2}]'></textarea><input type="file" id="imFile" accept=".json,.txt,application/json" style="margin-top:10px"><div class="err" id="imErr"></div><div class="acts"><button class="btn" id="imBtn" type="button">Importa</button></div></div>`;
+    $('cpBtn').onclick=async()=>{try{await navigator.clipboard.writeText(json);toast('Copiato')}catch(e){$('exTxt').select();toast('Seleziona e copia a mano')}};
+    $('xlFile').onchange=e=>{const f=e.target.files[0];if(f)readExcel(f)};
+    $('imFile').onchange=async e=>{const f=e.target.files[0];if(f)$('imTxt').value=await f.text()};
+    $('imBtn').onclick=async()=>{
+      if(readOnly){$('imErr').textContent='Puoi solo consultare i dati.';return}
+      let a;try{a=JSON.parse($('imTxt').value)}catch(e){$('imErr').textContent='Il testo non è un backup valido.';return}
+      if(!Array.isArray(a)){$('imErr').textContent='Il testo non è un backup valido.';return}
+      const ok=a.map(r=>({d:String(r.d),kg:+r.kg,p:r.p==null||r.p===''?null:+r.p})).filter(valid);
+      $('imErr').textContent='Importazione di '+ok.length+' uscite…';
+      await many(ok,'put');
+      $('imErr').textContent='';toast(ok.length+' uscite importate');render();
+    };
+  }
+}
+
+/* ---- export Excel ---- */
+async function exportXlsx(){
+  const E=$('xlExpErr'),btn=$('xlExp');E.textContent='';
+  const list=sorted().reverse();
+  if(!list.length){E.textContent='Non ci sono ancora dati da esportare.';return}
+  btn.disabled=true;btn.textContent='Preparo il file…';
+  try{
+    await loadXLSX();
+    const ws={},base=Date.UTC(1899,11,30);
+    ws.A1={t:'s',v:'Giorno'};ws.B1={t:'s',v:'Kg'};
+    list.forEach((r,i)=>{const [y,m,d]=r.d.split('-').map(Number);const n=i+2;
+      ws['A'+n]={t:'n',v:(Date.UTC(y,m-1,d)-base)/864e5,z:'dd/mm/yyyy'};ws['B'+n]={t:'n',v:r.kg,z:'#,##0.0'}});
+    ws['!ref']='A1:B'+(list.length+1);ws['!cols']=[{wch:12},{wch:10}];
+    const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Pescato');
+    const buf=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+    const name='granchio-blu-pescato-'+iso(new Date())+'.xlsx',type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    const file=new File([buf],name,{type});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      try{await navigator.share({files:[file],title:'Granchio Blu'})}catch(e){if(e&&e.name==='AbortError'){btn.disabled=false;btn.textContent='Scarica file Excel';return}throw e}
+    }else{const u=URL.createObjectURL(file),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
+    try{localStorage.setItem('granchio-ultimo-export',iso(new Date()))}catch(e){}
+    toast('File Excel pronto');
+  }catch(e){
+    E.textContent='Non sono riuscito a creare il file. Riprova.';
+  }
+  btn.disabled=false;btn.textContent='Scarica file Excel';
+}
+
+/* ---- import Excel ---- */
+function loadXLSX(){return new Promise((ok,ko)=>{if(window.XLSX)return ok();const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=ok;s.onerror=ko;document.head.appendChild(s)})}
+function toIso(v){
+  let d=null;
+  if(v instanceof Date&&!isNaN(v))d=v.getFullYear()+'-'+pad(v.getMonth()+1)+'-'+pad(v.getDate());
+  else if(typeof v==='number'&&v>20000&&v<80000){const t=new Date(Date.UTC(1899,11,30)+Math.floor(v)*864e5);d=t.getUTCFullYear()+'-'+pad(t.getUTCMonth()+1)+'-'+pad(t.getUTCDate())}
+  else if(typeof v==='string'){
+    v=v.trim();let m=v.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})(\D|$)/);
+    if(m)d=m[1]+'-'+pad(+m[2])+'-'+pad(+m[3]);
+    else{m=v.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{2,4})(\D|$)/);
+      if(m&&+m[2]<=12&&+m[1]<=31){let y=+m[3];if(y<100)y+=2000;d=y+'-'+pad(+m[2])+'-'+pad(+m[1])}}
+  }
+  if(!d)return null;const y=+d.slice(0,4);
+  return y>=2015&&y<=new Date().getFullYear()+1?d:null;
+}
+const toNum=v=>typeof v==='number'?v:num(String(v||'').replace(/[€a-z\s]/gi,''));
+const low=x=>String(x==null?'':x).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim();
+function parseSheet(a){
+  let h=-1,cD=1,cM=9,cK=18;
+  for(let i=0;i<Math.min(20,a.length);i++){
+    const r=(a[i]||[]).map(low);
+    const m=r.findIndex(x=>/descr ?materia ?prima/.test(x)),k=r.findIndex(x=>/qta ?quota|quantita ?quota/.test(x));
+    if(m>=0&&k>=0){h=i;cM=m;cK=k;const d=r.findIndex(x=>/data ?conferimento/.test(x));if(d>=0)cD=d;break}
+  }
+  const out=[];let skip=0,any=false;
+  for(let j=h+1;j<a.length;j++){const row=a[j]||[];
+    const m=low(row[cM]);if(!m)continue;
+    if(/vongole/.test(m)){skip++;continue}
+    any=true;
+    const d=toIso(row[cD]),k=toNum(row[cK]);
+    if(d&&k>0)out.push({d,kg:k,p:null});
+  }
+  return h<0&&!any?null:{rows:out,skip};
+}
+let pending=[];
+async function readExcel(f){
+  const O=$('xlOut');O.innerHTML='<p>Lettura del file…</p>';
+  try{await loadXLSX()}catch(e){O.innerHTML='<div class="err">Non riesco a caricare il lettore di Excel. Controlla la connessione e riprova.</div>';return}
+  let wb;try{wb=XLSX.read(await f.arrayBuffer(),{type:'array'})}catch(e){O.innerHTML='<div class="err">Questo file non si riesce ad aprire.</div>';return}
+  const agg=new Map(),info=[];let skip=0,found=false;
+  wb.SheetNames.forEach(n=>{const res=parseSheet(XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:null}));if(!res)return;found=true;skip+=res.skip;if(res.rows.length)info.push(n+' ('+res.rows.length+' righe)');
+    res.rows.forEach(x=>{const o=agg.get(x.d)||{d:x.d,kg:0,e:0,kp:0};o.kg+=x.kg;if(x.p!=null){o.e+=x.kg*x.p;o.kp+=x.kg}agg.set(x.d,o)})});
+  pending=[...agg.values()].map(r=>({d:r.d,kg:Math.round(r.kg*100)/100,p:r.kp?Math.round(r.e/r.kp*100)/100:null})).sort((a,b)=>a.d<b.d?-1:1);
+  if(!found){O.innerHTML='<div class="err">Non trovo le colonne giuste: servono dataConferimento (B), descrMateriaPrima (J) e qtaQuota (S).</div>';return}
+  if(!pending.length){O.innerHTML='<div class="err">Ho trovato le colonne ma nessuna riga (escluse le vongole) con data e chili validi.</div>';return}
+  const s=sum(pending),over=pending.filter(r=>rows.has(r.d)).length;
+  O.innerHTML=`<div class="tot" style="display:block;font-weight:500"><b>${pending.length} uscite</b> dal ${nice(pending[0].d)} al ${nice(pending[pending.length-1].d)}<br>${kg(s.k)}<br><span style="font-size:13px;color:var(--mute)">Tutte le righe tranne le vongole${skip?' · '+skip+' righe di vongole ignorate':''}<br>Fogli: ${info.join(', ')}${over?' · '+over+' giorni già presenti verranno sostituiti':''}</span></div>`+
+    pending.slice(0,3).map(rowHtml).join('')+`<div class="acts"><button class="btn ghost" id="xlNo" type="button">Annulla</button><button class="btn" id="xlGo" type="button">Importa</button></div>`;
+  $('xlNo').onclick=()=>{pending=[];O.innerHTML='';$('xlFile').value=''};
+  $('xlGo').onclick=async()=>{
+    if(readOnly){toast('Puoi solo consultare i dati');return}
+    $('xlGo').disabled=true;$('xlGo').textContent='Importazione…';
+    const list=pending;pending=[];
+    await many(list.map(r=>{const o=rows.get(r.d);return hasP(o)?{...r,p:o.p}:r}),'put');
+    render();toast(list.length+' uscite importate');
+  };
+}
+
+/* ---- salvataggio (Firestore: users/{uid}/uscite/{giorno}) ---- */
+// Le scritture non vengono attese: senza campo restano in coda sul telefono e partono appena torna la rete.
+function clean(r){return {d:r.d,kg:r.kg,p:hasP(r)?r.p:null}}
+async function put(r,quiet){
+  rows.set(r.d,r);if(!quiet)render();
+  if(col)setDoc(doc(col,r.d),clean(r)).catch(fail);
+}
+async function del(d,quiet){
+  rows.delete(d);if(!quiet)render();
+  if(col)deleteDoc(doc(col,d)).catch(fail);
+}
+async function many(list,op){
+  list.forEach(x=>op==='put'?rows.set(x.d,x):rows.delete(x));
+  if(!col)return;
+  for(let i=0;i<list.length;i+=400){
+    const b=writeBatch(fs);
+    list.slice(i,i+400).forEach(x=>op==='put'?b.set(doc(col,x.d),clean(x)):b.delete(doc(col,x)));
+    b.commit().catch(fail);
+  }
+}
+function fail(e){
+  if(e&&e.code==='permission-denied')toast('Salvataggio rifiutato: esci e rientra con il tuo account');
+  else if(e&&e.code==='resource-exhausted')toast('Limite giornaliero raggiunto: riprova domani');
+  else toast('Salvataggio non riuscito, riprova');
+}
+function status(t){$('status').textContent=t}
+const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function syncNote(meta){
+  if(!user)return '';
+  if(meta&&meta.hasPendingWrites)return 'Modifiche in attesa di rete: partono da sole appena c\'è campo';
+  if(meta&&meta.fromCache)return 'Senza rete: vedi i dati salvati sul telefono';
+  return 'Dati salvati nel tuo account Google · '+(user.email||'');
+}
+
+/* ---- accesso ---- */
+const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+const provider=new GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});
+function loginErr(e){
+  const c=e&&e.code||'';
+  if(c==='auth/popup-closed-by-user'||c==='auth/cancelled-popup-request')return '';
+  if(c==='auth/network-request-failed')return 'Serve la connessione per il primo accesso. Riprova quando c\'è rete.';
+  if(c==='auth/unauthorized-domain')return 'Questo indirizzo non è ancora autorizzato all\'accesso.';
+  return 'Accesso non riuscito, riprova.';
+}
+$('gLogin').onclick=async()=>{
+  $('lErr').textContent='';$('gLogin').disabled=true;
+  try{
+    if(standalone())await signInWithRedirect(auth,provider);
+    else{
+      try{await signInWithPopup(auth,provider)}
+      catch(e){if(e&&(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment'))await signInWithRedirect(auth,provider);else throw e}
+    }
+  }catch(e){$('lErr').textContent=loginErr(e)}
+  $('gLogin').disabled=false;
+};
+getRedirectResult(auth).catch(e=>{$('lErr').textContent=loginErr(e)});
+
+onAuthStateChanged(auth,u=>{
+  if(unsub){unsub();unsub=null}
+  user=u;rows=new Map();col=null;unsynced=false;
+  if(!u){
+    $('login').classList.add('on');$('gLogin').disabled=false;
+    $('page').classList.remove('on');closeSheet();render();status('');return;
+  }
+  $('login').classList.remove('on');
+  col=collection(fs,'users',u.uid,'uscite');
+  status('Caricamento dei dati…');render();
+  unsub=onSnapshot(col,{includeMetadataChanges:true},snap=>{
+    const m=new Map();snap.forEach(d=>{const r=d.data();if(valid(r))m.set(r.d,{d:r.d,kg:r.kg,p:hasP(r)?r.p:null})});
+    rows=m;unsynced=snap.metadata.hasPendingWrites;
+    render();status(syncNote(snap.metadata));
+  },e=>{status(e&&e.code==='permission-denied'?'Non hai accesso a questi dati: esci e rientra.':'Non riesco a leggere i dati, riprova più tardi.')});
+});
+
+render();
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+setInterval(()=>{const t=iso(new Date());if(t!==render.day){render.day=t;render()}},60000);render.day=iso(new Date());
+}
+</script>
+</body>
+</html>

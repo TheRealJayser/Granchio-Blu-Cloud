@@ -1,0 +1,3 @@
+# L'accesso con Google passa dallo stesso dominio dell'app (necessario per Safari su iPhone)
+/__/auth/*      https://granchio-blu.firebaseapp.com/__/auth/:splat      200
+/__/firebase/*  https://granchio-blu.firebaseapp.com/__/firebase/:splat  200

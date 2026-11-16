@@ -1,0 +1,26 @@
+rules_version = '2';
+
+// Granchio Blu: ogni utente legge e scrive solo i propri dati
+// (copia delle regole pubblicate nella console Firebase, progetto granchio-blu)
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function owner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    function validUscita(d) {
+      let r = request.resource.data;
+      return d.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && r.keys().hasOnly(['d', 'kg', 'p', 't'])
+        && r.d == d
+        && r.kg is number && r.kg > 0 && r.kg < 100000
+        && (!('p' in r) || r.p == null || (r.p is number && r.p >= 0 && r.p < 10000));
+    }
+
+    match /users/{uid}/uscite/{d} {
+      allow read, delete: if owner(uid);
+      allow create, update: if owner(uid) && validUscita(d);
+    }
+  }
+}
