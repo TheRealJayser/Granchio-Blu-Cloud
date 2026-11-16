@@ -2,6 +2,11 @@
 
 Tutti gli aggiornamenti dell'app Granchio Blu (versione con accesso Google), dal più recente.
 
+## Versione 3.5 — 16 novembre 2026
+
+### Modificato
+- **Inserimento del pescato (pulsante +):** chili e prezzo ora si scrivono in **due riquadri grandi** affiancati, con numeri grossi e ben leggibili, come nella prima versione dell'app. Il bordo dei riquadri riprende il colore del **+** e si accende quando si tocca il riquadro. Il giorno resta in alto.
+
 ## Versione 3.4 — 16 novembre 2026
 
 ### Modificato
