@@ -39,7 +39,7 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .pager{display:flex;height:100%;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
 .pager::-webkit-scrollbar,.pg::-webkit-scrollbar,.chips::-webkit-scrollbar{display:none}
 .pg{flex:0 0 100%;height:100%;overflow-y:auto;overflow-x:hidden;scroll-snap-align:start;scroll-snap-stop:always;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-.wrap{max-width:560px;margin:0 auto;padding:0 max(16px,env(safe-area-inset-right)) calc(120px + var(--sb)) max(16px,env(safe-area-inset-left))}
+.wrap{max-width:560px;margin:0 auto;padding:0 max(16px,env(safe-area-inset-right)) calc(110px + var(--sb)) max(16px,env(safe-area-inset-left))}
 .nav{position:sticky;top:0;z-index:3;height:calc(44px + var(--st));padding-top:var(--st);display:grid;place-items:center;font-weight:600;border-bottom:.5px solid transparent;transition:background-color .25s,border-color .25s}
 .nav span{opacity:0;transform:translateY(6px);transition:opacity .25s,transform .35s var(--ease)}
 .pg.scrolled .nav{background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-color:var(--line)}
@@ -141,7 +141,7 @@ textarea{display:block;width:100%;min-height:110px;border:0;background:none;padd
 .two .rbtn.b{font-weight:600}
 
 /* barra in basso */
-.dock{position:fixed;left:0;right:0;bottom:0;z-index:5;padding:0 max(14px,env(safe-area-inset-right)) calc(10px + var(--sb)) max(14px,env(safe-area-inset-left));display:flex;gap:10px;justify-content:center;align-items:center;pointer-events:none}
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:5;padding:0 max(14px,env(safe-area-inset-right)) max(14px,calc(var(--sb) - 20px)) max(14px,env(safe-area-inset-left));display:flex;gap:10px;justify-content:center;align-items:center;pointer-events:none}
 .tabs{pointer-events:auto;flex:1;max-width:400px;height:62px;display:grid;grid-template-columns:repeat(4,1fr);position:relative;padding:4px;border-radius:31px;background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);border:.5px solid var(--edge);box-shadow:0 8px 28px rgba(0,0,0,.16)}
 .tabs .pill{position:absolute;left:4px;top:4px;bottom:4px;width:calc((100% - 8px)/4);border-radius:27px;background:var(--fill);will-change:transform}
 .tabs button{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10px;font-weight:600;color:var(--mute);border-radius:27px;transition:color .25s,transform .25s var(--ease)}
@@ -294,7 +294,7 @@ import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase
 import {getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,onAuthStateChanged,signOut} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,setDoc,deleteDoc,writeBatch,onSnapshot} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 {
-const VERSIONE='3.3';
+const VERSIONE='3.4';
 /* ---- Firebase ---- */
 // Su Firebase Hosting l'accesso passa dallo stesso dominio dell'app, così funziona anche su iPhone.
 const onFbHost=/\.(web\.app|firebaseapp\.com)$/.test(location.hostname);

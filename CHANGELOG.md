@@ -2,6 +2,11 @@
 
 Tutti gli aggiornamenti dell'app Granchio Blu (versione con accesso Google), dal più recente.
 
+## Versione 3.4 — 16 novembre 2026
+
+### Modificato
+- La barra in basso e il pulsante **+** sono ora più vicini al bordo inferiore del telefono, alla stessa distanza che hanno dai bordi laterali, come nelle app iOS.
+
 ## Versione 3.3 — 16 novembre 2026
 
 ### Aggiunto
