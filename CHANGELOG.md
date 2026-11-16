@@ -2,6 +2,22 @@
 
 Tutti gli aggiornamenti dell'app Granchio Blu (versione con accesso Google), dal più recente.
 
+## Versione 3.1 — 16 novembre 2026
+
+Nuova grafica in stile iOS, con animazioni e personalizzazione.
+
+### Aggiunto
+- **Barra in basso** con quattro sezioni: *Home*, *Uscite*, *Anni* e *Impostazioni*. Si cambia sezione toccando la barra oppure **scorrendo col dito** a destra e a sinistra. Il **+** per inserire il pescato sta accanto alla barra.
+- **Personalizzazione** in *Impostazioni → Aspetto*: tema automatico, chiaro o scuro, e sei colori per l'app (blu granchio, laguna, alga, corallo, viola, ardesia).
+- **Animazioni:** il totale dell'anno conta fino al valore, le barre crescono, le righe entrano una dopo l'altra, l'uscita appena salvata si illumina, gli avvisi scendono dall'alto.
+- Nella sezione *Uscite* gli anni si scelgono con i pulsanti in alto e c'è il riepilogo dell'anno (chili, uscite, media).
+- Nella sezione *Anni* ogni anno ha la sua barra di confronto e l'incasso.
+
+### Modificato
+- **Grafica iOS:** titoli grandi che si rimpiccioliscono scorrendo, liste raggruppate, barre traslucide, carattere di sistema.
+- La scheda di inserimento ha *Annulla* e *Salva* in alto e si chiude anche trascinandola verso il basso.
+- Il menu con le tre lineette non c'è più: Backup, Excel ed eliminazione dei dati sono in *Impostazioni*.
+
 ## Versione 3.0 — 16 novembre 2026
 
 Prima versione con **accesso Google** e **dati salvati online**. Parte dalla versione 2.3 di [Granchio-Blu-App-Tracker](https://github.com/TheRealJayser/Granchio-Blu-App-Tracker), che resta com'è.

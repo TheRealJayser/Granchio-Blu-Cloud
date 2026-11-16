@@ -7,189 +7,263 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Granchio Blu">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0b1320" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <title>Granchio Blu</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>try{var t=localStorage.getItem('granchio-tema');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;var c=localStorage.getItem('granchio-colore');if(/^#[0-9a-f]{6}$/i.test(c||''))document.documentElement.style.setProperty('--tint',c)}catch(e){}</script>
 <style>
-/* VOICE: calmo, pratico, da strumento di lavoro in barca: pochi numeri grandi e leggibili.
-   IDEA: il libretto delle pesate al banco del mercato ittico, una riga per ogni uscita.
-   PICTURE: la fascia blu col totale dell'anno, poi le barre del confronto anno per anno.
-   COLOUR and TYPE: bianco, blu granchio #1b5fd0 dominante, inchiostro #0d1b2e, accento corallo #ff5a36 (le punte delle chele); Figtree.
-   LAYOUT: colonna unica da telefono, max 560px, barra fissa in basso con il + al centro e il menu a destra. */
-:root{color-scheme:light dark;
---bg:light-dark(#ffffff,#0b1320);--ink:light-dark(#0d1b2e,#e8eef8);--mute:light-dark(#5b6b80,#93a3b8);
---line:light-dark(#e4e9f1,#1d2a3d);--card:light-dark(#f4f7fb,#111c2d);--blue:#1b5fd0;--blue2:light-dark(#dce8fb,#17325c);
---coral:#ff5a36;--pos:light-dark(#0f7a4a,#4fd39a);--neg:light-dark(#c2361b,#ff8a70)}
+/* Grafica in stile iOS: titoli grandi, liste raggruppate, barre traslucide, carattere di sistema.
+   Quattro pagine affiancate che si scorrono col dito; in basso la barra a capsula con il + accanto.
+   Il colore dell'app (--tint) si sceglie in Impostazioni. */
+:root{color-scheme:light dark;--tint:#1b5fd0;
+--bg:light-dark(#f2f2f7,#000);--card:light-dark(#fff,#1c1c1e);
+--ink:light-dark(#000,#fff);--mute:light-dark(rgba(60,60,67,.62),rgba(235,235,245,.62));
+--line:light-dark(rgba(60,60,67,.2),rgba(84,84,88,.62));--fill:light-dark(rgba(120,120,128,.13),rgba(120,120,128,.26));
+--thumb:light-dark(#fff,#636366);--glass:light-dark(rgba(250,250,252,.74),rgba(32,32,35,.74));--edge:light-dark(rgba(0,0,0,.06),rgba(255,255,255,.1));
+--tint-ink:light-dark(var(--tint),color-mix(in srgb,var(--tint) 62%,#fff));
+--red:light-dark(#ff3b30,#ff453a);--green:light-dark(#248a3d,#30d158);
+--ease:cubic-bezier(.32,.72,0,1);--st:env(safe-area-inset-top);--sb:env(safe-area-inset-bottom)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
-*{box-sizing:border-box;min-width:0}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Figtree,system-ui,-apple-system,sans-serif;overflow-x:clip;-webkit-tap-highlight-color:transparent}
-.wrap{max-width:560px;margin:0 auto;padding:0 max(18px,env(safe-area-inset-right)) 130px max(18px,env(safe-area-inset-left))}
-html,body{overscroll-behavior-y:none}
-header{display:flex;justify-content:space-between;align-items:baseline;padding:calc(22px + env(safe-area-inset-top)) 0 14px}
-header h1{font-size:22px;font-weight:800;margin:0;letter-spacing:-.01em}
-header span{color:var(--mute);font-size:14px}
-.hero{background:var(--blue);color:#fff;border-radius:24px;padding:22px 22px 20px;position:relative;overflow:hidden}
+*{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;overflow:hidden;overscroll-behavior:none}
+body{background:var(--bg);color:var(--ink);font:17px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",system-ui,sans-serif;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid color-mix(in srgb,var(--tint) 60%,transparent);outline-offset:2px}
+
+/* pagine */
+.pager{display:flex;height:100%;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+.pager::-webkit-scrollbar,.pg::-webkit-scrollbar,.chips::-webkit-scrollbar{display:none}
+.pg{flex:0 0 100%;height:100%;overflow-y:auto;overflow-x:hidden;scroll-snap-align:start;scroll-snap-stop:always;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.wrap{max-width:560px;margin:0 auto;padding:0 max(16px,env(safe-area-inset-right)) calc(120px + var(--sb)) max(16px,env(safe-area-inset-left))}
+.nav{position:sticky;top:0;z-index:3;height:calc(44px + var(--st));padding-top:var(--st);display:grid;place-items:center;font-weight:600;border-bottom:.5px solid transparent;transition:background-color .25s,border-color .25s}
+.nav span{opacity:0;transform:translateY(6px);transition:opacity .25s,transform .35s var(--ease)}
+.pg.scrolled .nav{background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-color:var(--line)}
+.pg.scrolled .nav span{opacity:1;transform:none}
+.over{margin:0 4px;color:var(--mute);font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.02em}
+.lt{font-size:34px;line-height:41px;font-weight:700;letter-spacing:.01em;margin:0 4px 14px}
+.gh{font-size:20px;font-weight:700;margin:28px 4px 10px}
+.gh em{font-style:normal;color:var(--mute);font-weight:500;font-size:15px}
+.cap{font-size:13px;color:var(--mute);text-transform:uppercase;letter-spacing:.02em;margin:26px 16px 7px}
+.ft{font-size:13px;color:var(--mute);margin:7px 16px 0}
+.foot{font-size:13px;color:var(--mute);text-align:center;margin:22px 16px 0}
+
+/* riquadro del totale */
+.hero{background:linear-gradient(145deg,color-mix(in srgb,var(--tint) 86%,#fff),var(--tint) 55%,color-mix(in srgb,var(--tint) 78%,#000));color:#fff;border-radius:22px;padding:20px;position:relative;overflow:hidden;box-shadow:0 12px 30px -14px color-mix(in srgb,var(--tint) 75%,transparent)}
 .hero svg.claw{position:absolute;right:-18px;top:-10px;width:150px;height:150px;opacity:.16}
-.hero .lab{font-size:15px;opacity:.85}
-.hero .big{font-size:clamp(40px,12vw,56px);font-weight:800;line-height:1.05;margin:4px 0 6px;letter-spacing:-.02em;white-space:nowrap}
-.hero .big small{font-size:.45em;font-weight:600;opacity:.85;margin-left:4px}
+.hero .lab{font-size:15px;opacity:.88}
+.hero .big{font-size:clamp(40px,12vw,56px);font-weight:700;line-height:1.05;margin:4px 0 6px;letter-spacing:-.01em;white-space:nowrap;font-variant-numeric:tabular-nums}
+.hero .big small{font-size:.42em;font-weight:600;opacity:.88;margin-left:5px}
 .hero .sub{font-size:15px;opacity:.92}
-.chip[hidden]{display:none}.chip{display:inline-block;margin-top:12px;padding:5px 11px;border-radius:99px;background:rgba(255,255,255,.18);font-size:14px;font-weight:600}
-h2{font-size:17px;font-weight:700;margin:28px 0 10px}
-h2 em{font-style:normal;color:var(--mute);font-weight:500}
-.today{background:var(--card);border-radius:20px;padding:16px 18px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.today div b{display:block;font-size:24px;font-weight:800;white-space:nowrap}
-.today div span{font-size:13px;color:var(--mute)}
-.today.empty{display:flex;justify-content:space-between;align-items:center;gap:12px;color:var(--mute)}
-.today.empty button{flex:none}
-.yr{display:grid;grid-template-columns:54px minmax(0,1fr) auto;gap:4px 12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
-.yr .y{font-weight:700}
-.yr .bar{height:12px;background:var(--blue2);border-radius:6px;overflow:hidden}
-.yr .bar i{display:block;height:100%;background:var(--blue);border-radius:6px}
-.yr.cur .bar i{background:var(--coral)}
-.yr .v{text-align:right;font-weight:700;white-space:nowrap}
-.yr .d{grid-column:2/4;font-size:13px;color:var(--mute);display:flex;justify-content:space-between;gap:8px}
-.up{color:var(--pos);font-weight:600}.dn{color:var(--neg);font-weight:600}
-.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding:12px 4px;border-bottom:1px solid var(--line);cursor:pointer}
-.row:active{background:var(--card)}
-.row .dt{font-weight:600}.row .kg{text-align:right;font-weight:700;white-space:nowrap}
-.row .pr{font-size:13px;color:var(--mute)}.row .eu{font-size:13px;color:var(--mute);text-align:right;white-space:nowrap}
-.none{color:var(--mute);padding:14px 0}
-.note{font-size:13px;color:var(--mute);text-align:center;margin-top:22px}
-.dock{position:fixed;left:0;right:0;bottom:0;padding:12px 18px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 35%);pointer-events:none;z-index:5}
-.dock .in{max-width:560px;margin:0 auto;position:relative;height:72px}
-.fab{pointer-events:auto;position:absolute;left:50%;top:0;transform:translateX(-50%);width:72px;height:72px;border-radius:50%;border:0;background:var(--coral);color:#fff;box-shadow:0 8px 22px rgba(255,90,54,.4);cursor:pointer;display:grid;place-items:center}
-.menu{pointer-events:auto;position:absolute;left:0;top:12px;width:56px;height:56px;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--ink);box-shadow:0 4px 14px rgba(13,27,46,.12);cursor:pointer;display:grid;place-items:center}
-button{font:inherit}
-.btn{min-height:48px;padding:0 20px;border-radius:14px;border:0;background:var(--blue);color:#fff;font-weight:700;cursor:pointer}
-.btn.ghost{background:var(--card);color:var(--ink)}.btn:disabled{opacity:.45;cursor:default}
-.btn.red{background:transparent;color:var(--neg);border:1px solid var(--line)}
-button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--coral);outline-offset:2px}
-.scrim{position:fixed;inset:0;background:rgba(5,12,24,.45);z-index:10;display:none}
-.scrim.on{display:block}
-.sheet{position:fixed;left:0;right:0;bottom:0;width:100%;z-index:11;background:var(--bg);border-radius:24px 24px 0 0;padding:10px 20px calc(20px + env(safe-area-inset-bottom));max-width:560px;margin:0 auto;transform:translateY(105%);transition:transform .25s ease}
-.sheet.on{transform:none}
-.grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 12px}
-.sheet h3{margin:0 0 14px;font-size:20px}
-label{display:block;font-size:14px;color:var(--mute);margin:12px 0 6px}
-input,select,textarea{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px;min-height:50px}
-input[type=date]{-webkit-appearance:none;appearance:none;display:block;width:100%;max-width:100%;min-width:0;text-align:left}
-input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
-input[type=date]::-webkit-calendar-picker-indicator{margin:0}
-.sheet{overflow-x:hidden}.sheet *{max-width:100%}
-input.huge{font-size:28px;font-weight:800;padding:10px 14px}
-.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
-.tot{margin:16px 0;padding:14px;border-radius:14px;background:var(--blue2);display:flex;justify-content:space-between;font-weight:700}
-.acts{display:flex;gap:10px;margin-top:8px}.acts .btn{flex:1}
-.err{color:var(--neg);font-size:14px;min-height:20px;margin-top:6px}
-.page{position:fixed;inset:0;z-index:9;background:var(--bg);overflow-y:auto;display:none}
-.page.on{display:block}
-.page .top{position:sticky;top:0;background:var(--bg);z-index:2;padding:calc(18px + env(safe-area-inset-top)) 18px 0;max-width:560px;margin:0 auto}
-.page .top .h{display:flex;justify-content:space-between;align-items:center}
-.page .top h1{margin:0;font-size:24px;font-weight:800}
-.x{width:44px;height:44px;border-radius:50%;border:0;background:var(--card);color:var(--ink);cursor:pointer;font-size:22px}
-.tabs{display:flex;gap:6px;margin:14px 0 0;padding-bottom:10px;border-bottom:1px solid var(--line)}
-.tabs button{flex:1;padding:0 4px;font-size:15px;min-height:44px;border-radius:12px;border:0;background:transparent;color:var(--mute);font-weight:600;cursor:pointer}
-.tabs button.on{background:var(--blue2);color:var(--ink)}
-.mo{display:flex;justify-content:space-between;margin:22px 4px 4px;font-weight:700}
+.hchip{display:inline-block;margin-top:12px;padding:5px 11px;border-radius:99px;background:rgba(255,255,255,.2);font-size:13px;font-weight:600}
+
+/* liste raggruppate */
+.grp{background:var(--card);border-radius:14px;overflow:hidden}
+.grp>*{position:relative}
+.grp>*+*::before{content:"";position:absolute;left:16px;right:0;top:0;height:.5px;background:var(--line)}
+.row{display:flex;align-items:center;gap:10px;padding:10px 12px 10px 16px;min-height:58px;cursor:pointer;transition:background-color .2s}
+.row:active{background:var(--fill)}
+.row .l{flex:1}.row .r{text-align:right;white-space:nowrap}
+.row b{display:block;font-weight:600}.row .l b::first-letter{text-transform:uppercase}
+.row span{display:block;font-size:14px;color:var(--mute)}
+.row svg{flex:none;color:var(--mute);opacity:.55}
+.none{color:var(--mute);padding:16px;font-size:15px}
+.stat3{background:var(--card);border-radius:14px;padding:14px 16px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;transition:transform .25s var(--ease)}
+.stat3 b{display:block;font-size:22px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+.stat3 span{font-size:13px;color:var(--mute)}
+.stat3.tap{cursor:pointer}.stat3.tap:active{transform:scale(.97)}
+.empty{background:var(--card);border-radius:14px;padding:12px 12px 12px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;color:var(--mute);font-size:15px}
+.pillbtn{flex:none;height:36px;padding:0 16px;border-radius:18px;background:var(--tint);color:#fff;font-weight:600;font-size:15px;transition:transform .2s var(--ease),opacity .2s}
+.pillbtn:active{transform:scale(.94);opacity:.85}
+.yr{padding:12px 16px}
+.yr .t{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-weight:600}
+.yr .t span{white-space:nowrap}
+.yr .bar{height:8px;background:var(--fill);border-radius:4px;overflow:hidden;margin:8px 0 6px}
+.yr .bar i{display:block;height:100%;border-radius:4px;background:color-mix(in srgb,var(--tint) 45%,transparent);transform-origin:left}
+.yr.cur .bar i{background:var(--tint)}
+.yr .d{font-size:13px;color:var(--mute);display:flex;justify-content:space-between;gap:8px}
+.badge{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:99px;background:color-mix(in srgb,var(--tint) 16%,transparent);color:var(--tint-ink);font-size:12px;font-weight:600;vertical-align:2px}
+.mo{display:flex;justify-content:space-between;align-items:baseline;margin:24px 16px 8px;font-weight:700;font-size:20px}
 .mo span{color:var(--mute);font-weight:500;font-size:14px}
-table{width:100%;border-collapse:collapse;margin-top:10px}
-th,td{padding:12px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
-th{font-size:13px;color:var(--mute);font-weight:600}th:first-child,td:first-child{text-align:left}
-td:first-child{font-weight:700}
-.opts{display:grid;gap:10px}.opt{display:flex;justify-content:space-between;align-items:center;min-height:64px;padding:0 18px;border-radius:16px;border:2px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-align:left}.opt b{font-size:18px}.opt span{color:var(--mute);font-size:14px}.opt.on{border-color:var(--blue);background:var(--blue2)}
-.bk p{color:var(--mute);font-size:15px}
-.bk textarea{min-height:120px;font-size:13px;font-family:ui-monospace,Menlo,monospace}
-.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:15px;z-index:20;opacity:0;transition:opacity .2s;pointer-events:none}
-.toast.on{opacity:1}
-.login{position:fixed;inset:0;z-index:30;background:var(--bg);display:none;overflow-y:auto}
-.login.on{display:block}
-.login .in{max-width:440px;margin:0 auto;padding:calc(40px + env(safe-area-inset-top)) 22px 40px;display:flex;flex-direction:column;gap:18px;min-height:100%}
-.login .hero{margin-top:10px}
-.login p{color:var(--mute);margin:0}
-.gbtn{display:flex;align-items:center;justify-content:center;gap:12px;min-height:56px;border-radius:16px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-weight:700;font-size:17px;cursor:pointer;box-shadow:0 4px 14px rgba(13,27,46,.08)}
-.gbtn:disabled{opacity:.5;cursor:default}
-.acct{display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;background:var(--card)}
-.acct img{width:44px;height:44px;border-radius:50%;flex:none}
-.acct div{flex:1}.acct b{display:block}.acct span{font-size:14px;color:var(--mute);word-break:break-all}
-@media(prefers-reduced-motion:reduce){.sheet{transition:none}}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 16px 14px;margin:0 -16px;scrollbar-width:none;overscroll-behavior-x:contain}
+.chip2{flex:none;height:34px;padding:0 16px;border-radius:17px;background:var(--fill);font-weight:600;font-size:15px;transition:background-color .25s,color .25s,transform .2s var(--ease)}
+.chip2:active{transform:scale(.93)}
+.chip2.on{background:var(--tint);color:#fff}
+
+/* impostazioni */
+.acct{display:flex;align-items:center;gap:12px;padding:12px 16px}
+.acct img,.acct .av{width:46px;height:46px;border-radius:50%;flex:none}
+.acct .av{background:var(--tint);color:#fff;display:grid;place-items:center;font-weight:700;font-size:20px}
+.acct div.n{flex:1}.acct b{display:block}.acct span{font-size:14px;color:var(--mute);word-break:break-all}
+.rbtn{display:block;width:100%;text-align:left;min-height:46px;padding:11px 16px;color:var(--tint-ink);transition:background-color .2s}
+.rbtn:active{background:var(--fill)}.rbtn.red{color:var(--red)}.rbtn:disabled{opacity:.4}
+label.rbtn{cursor:pointer}label.rbtn input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.pad{padding:12px 16px}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;position:relative;background:var(--fill);border-radius:9px;padding:2px}
+.seg i{position:absolute;left:2px;top:2px;bottom:2px;width:calc((100% - 4px)/var(--n));border-radius:7px;background:var(--thumb);box-shadow:0 3px 8px rgba(0,0,0,.12),0 1px 1px rgba(0,0,0,.04);transform:translateX(calc(var(--i)*100%));transition:transform .35s var(--ease)}
+.seg button{position:relative;height:32px;font-size:13px;font-weight:500;transition:font-weight .2s}
+.seg button.on{font-weight:600}
+.sw{display:flex;gap:14px;padding:14px 16px;flex-wrap:wrap}
+.sw button{width:32px;height:32px;border-radius:50%;background:var(--c);transition:transform .25s var(--ease)}
+.sw button:active{transform:scale(.88)}
+.sw button.on{outline:2.5px solid var(--c);outline-offset:2.5px}
+.fld{display:flex;align-items:center;gap:12px;min-height:46px;padding:0 16px}
+.fld span{flex:none}
+.fld select,.fld input{flex:1;border:0;background:none;text-align:right;padding:12px 0;outline:0;-webkit-appearance:none;appearance:none}
+.fld select{text-align-last:right;color:var(--tint-ink)}
+.fld:focus-within{background:var(--fill)}
+textarea{display:block;width:100%;min-height:110px;border:0;background:none;padding:12px 16px;font:13px/1.4 ui-monospace,Menlo,monospace;outline:0;resize:vertical}
+.err{color:var(--red);font-size:14px;min-height:20px;margin:6px 16px 0}
+.xl{margin-top:10px}
+.xl .info{padding:12px 16px;font-size:15px}.xl .info span{display:block;font-size:13px;color:var(--mute);margin-top:4px}
+.two{display:grid;grid-template-columns:1fr 1fr}
+.two .rbtn{text-align:center}.two .rbtn+.rbtn{border-left:.5px solid var(--line)}
+.two .rbtn.b{font-weight:600}
+
+/* barra in basso */
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:5;padding:0 max(14px,env(safe-area-inset-right)) calc(10px + var(--sb)) max(14px,env(safe-area-inset-left));display:flex;gap:10px;justify-content:center;align-items:center;pointer-events:none}
+.tabs{pointer-events:auto;flex:1;max-width:400px;height:62px;display:grid;grid-template-columns:repeat(4,1fr);position:relative;padding:4px;border-radius:31px;background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);border:.5px solid var(--edge);box-shadow:0 8px 28px rgba(0,0,0,.16)}
+.tabs .pill{position:absolute;left:4px;top:4px;bottom:4px;width:calc((100% - 8px)/4);border-radius:27px;background:var(--fill);will-change:transform}
+.tabs button{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10px;font-weight:600;color:var(--mute);border-radius:27px;transition:color .25s,transform .25s var(--ease)}
+.tabs button.on{color:var(--tint-ink)}
+.tabs button:active{transform:scale(.9)}
+.tabs button.on svg{animation:pop .45s var(--ease)}
+.fab{pointer-events:auto;flex:none;width:62px;height:62px;border-radius:50%;background:var(--tint);color:#fff;display:grid;place-items:center;box-shadow:0 8px 24px -4px color-mix(in srgb,var(--tint) 65%,transparent),0 2px 6px rgba(0,0,0,.12);transition:transform .3s var(--ease)}
+.fab:active{transform:scale(.88)}
+
+/* scheda di inserimento */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:10;opacity:0;visibility:hidden;transition:opacity .35s,visibility 0s .35s}
+.scrim.on{opacity:1;visibility:visible;transition:opacity .35s}
+.sheet{--card:light-dark(#fff,#2c2c2e);position:fixed;left:0;right:0;bottom:0;z-index:11;max-width:560px;margin:0 auto;background:light-dark(#f2f2f7,#1c1c1e);border-radius:16px 16px 0 0;padding:0 16px calc(20px + var(--sb));transform:translateY(105%);visibility:hidden;transition:transform .5s var(--ease),visibility 0s .5s;box-shadow:0 -10px 40px rgba(0,0,0,.2)}
+.sheet.on{transform:none;visibility:visible;transition:transform .5s var(--ease)}
+.shead{touch-action:none;cursor:grab;margin:0 -16px;padding:6px 8px 10px}
+.grab{width:36px;height:5px;border-radius:3px;background:var(--mute);opacity:.4;margin:0 auto 4px}
+.shbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
+.shbar h3{margin:0;font-size:17px;font-weight:600}
+.tbtn{min-height:44px;padding:0 10px;color:var(--tint-ink);justify-self:start;transition:opacity .2s}
+.tbtn.b{font-weight:600;justify-self:end}.tbtn:active{opacity:.4}
+.frow{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:50px;padding:0 16px}
+.frow span{flex:none}
+.frow input{flex:1;border:0;background:none;text-align:right;padding:13px 0;outline:0;font-weight:600;-webkit-appearance:none;appearance:none;font-variant-numeric:tabular-nums}
+.frow input::placeholder{font-weight:400;color:var(--mute);opacity:.7}
+.frow input[type=date]::-webkit-date-and-time-value{text-align:right}
+.frow:focus-within{background:var(--fill)}
+.tot{display:flex;justify-content:space-between;align-items:baseline;margin:14px 16px 0;color:var(--mute);font-size:15px}
+.tot b{color:var(--ink);font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.sheet .grp.del{margin-top:14px}
+
+/* avvisi e accesso */
+.toast{position:fixed;left:50%;top:calc(10px + var(--st));z-index:40;max-width:calc(100% - 32px);padding:11px 18px;border-radius:99px;background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);border:.5px solid var(--edge);box-shadow:0 8px 28px rgba(0,0,0,.18);font-size:15px;font-weight:600;text-align:center;transform:translate(-50%,-180%);transition:transform .55s var(--ease);pointer-events:none}
+.toast.on{transform:translate(-50%,0)}
+.login{position:fixed;inset:0;z-index:30;background:var(--bg);overflow-y:auto;opacity:0;visibility:hidden;transform:scale(1.04);transition:opacity .4s,transform .5s var(--ease),visibility 0s .5s}
+.login.on{opacity:1;visibility:visible;transform:none;transition:opacity .3s,transform .5s var(--ease)}
+.login .in{max-width:400px;margin:0 auto;min-height:100%;padding:calc(48px + var(--st)) 24px calc(32px + var(--sb));display:flex;flex-direction:column;align-items:center;text-align:center}
+.appicon{width:96px;height:96px;border-radius:22px;box-shadow:0 12px 30px -8px color-mix(in srgb,var(--tint) 55%,transparent);margin-top:8vh}
+.login h1{font-size:34px;font-weight:700;margin:22px 0 8px}
+.login p{color:var(--mute);margin:0 0 28px}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;height:52px;border-radius:14px;background:var(--card);font-weight:600;box-shadow:0 2px 10px rgba(0,0,0,.08);transition:transform .25s var(--ease),opacity .2s}
+.gbtn:active{transform:scale(.97)}.gbtn:disabled{opacity:.5}
+.login .ft{margin-top:auto;padding-top:24px}
+
+/* animazioni */
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+@keyframes grow{from{transform:scaleX(0)}}
+@keyframes pop{0%{transform:scale(.8)}55%{transform:scale(1.14)}100%{transform:none}}
+@keyframes flash{0%,35%{background:color-mix(in srgb,var(--tint) 20%,transparent)}}
+.anim .hero,.anim .stat3,.anim .empty,.anim .grp,.anim .mo,.anim .gh{animation:rise .6s var(--ease) both}
+.anim .row,.anim .yr{animation:rise .55s var(--ease) both;animation-delay:calc(var(--i,0)*40ms + 80ms)}
+.anim .yr .bar i{animation:grow .9s var(--ease) both .25s}
+.row.flash{animation:flash 1.4s ease-out}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header><h1>Granchio Blu</h1><span id="todayLbl"></span></header>
-  <section class="hero" aria-live="polite">
-    <svg class="claw" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 92c-6-18-4-34 6-46-14-2-24-12-26-28 10 6 20 8 30 6-4-8-4-16 0-22 6 10 16 16 28 16-2 16-12 28-26 32 6 12 6 26 0 42z" fill="#fff"/></svg>
-    <div class="lab" id="heroLab">Totale dell'anno fino a oggi</div>
-    <div class="big" id="heroKg">0<small>kg</small></div>
-    <div class="sub" id="heroSub">Nessuna uscita registrata</div>
-    <div class="chip" id="heroChip" hidden></div>
+<div class="pager" id="pager">
+  <section class="pg" aria-label="Home">
+    <div class="nav"><span>Granchio Blu</span></div>
+    <div class="wrap">
+      <p class="over" id="todayLbl"></p>
+      <h1 class="lt">Granchio Blu</h1>
+      <section class="hero" aria-live="polite">
+        <svg class="claw" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 92c-6-18-4-34 6-46-14-2-24-12-26-28 10 6 20 8 30 6-4-8-4-16 0-22 6 10 16 16 28 16-2 16-12 28-26 32 6 12 6 26 0 42z" fill="#fff"/></svg>
+        <div class="lab" id="heroLab">Totale dell'anno fino a oggi</div>
+        <div class="big" id="heroKg">0<small>kg</small></div>
+        <div class="sub" id="heroSub"></div>
+        <div class="hchip" id="heroChip" hidden></div>
+      </section>
+      <h2 class="gh">Oggi</h2>
+      <div id="today"></div>
+      <h2 class="gh" id="cmpTitle">Lo stesso giorno negli anni</h2>
+      <div class="grp" id="cmp"></div>
+      <h2 class="gh">Ultime uscite</h2>
+      <div class="grp" id="recent"></div>
+      <p class="foot" id="status">Caricamento…</p>
+    </div>
   </section>
-
-  <h2>Oggi</h2>
-  <div id="today"></div>
-
-  <h2 id="cmpTitle">Confronto alla stessa data</h2>
-  <div id="cmp"></div>
-
-  <h2>Ultime uscite</h2>
-  <div id="recent"></div>
-  <div class="note" id="status">Caricamento…</div>
+  <section class="pg" aria-label="Uscite">
+    <div class="nav"><span>Uscite</span></div>
+    <div class="wrap">
+      <h1 class="lt">Uscite</h1>
+      <div class="chips" id="yChips"></div>
+      <div id="daysBody"></div>
+    </div>
+  </section>
+  <section class="pg" aria-label="Anni">
+    <div class="nav"><span>Anni</span></div>
+    <div class="wrap">
+      <h1 class="lt">Anni</h1>
+      <div id="yearsBody"></div>
+    </div>
+  </section>
+  <section class="pg" aria-label="Impostazioni">
+    <div class="nav"><span>Impostazioni</span></div>
+    <div class="wrap">
+      <h1 class="lt">Impostazioni</h1>
+      <div id="setBody"></div>
+    </div>
+  </section>
 </div>
 
-<div class="dock"><div class="in">
-  <button class="fab" id="addBtn" aria-label="Aggiungi pescato"><svg width="34" height="34" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
-  <button class="menu" id="menuBtn" aria-label="Apri menu"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
-</div></div>
+<div class="dock">
+  <nav class="tabs" id="tabs" aria-label="Sezioni">
+    <i class="pill"></i>
+    <button type="button" class="on"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5 12 4.5l8 7"/><path d="M6 10v8.5a1 1 0 0 0 1 1h3.5v-5h3v5H17a1 1 0 0 0 1-1V10"/></svg><span>Home</span></button>
+    <button type="button"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5.5" width="16" height="14" rx="3"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></svg><span>Uscite</span></button>
+    <button type="button"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 19.500v-6M12 19.500v-14M18 19.500v-9"/></svg><span>Anni</span></button>
+    <button type="button"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7.500h9M18 7.500h1M5 16.500h1M10 16.500h9"/><circle cx="16" cy="7.500" r="2"/><circle cx="8" cy="16.500" r="2"/></svg><span>Impostazioni</span></button>
+  </nav>
+  <button class="fab" id="addBtn" type="button" aria-label="Aggiungi pescato"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+</div>
 
 <div class="scrim" id="scrim"></div>
-<form class="sheet" id="sheet" novalidate>
-  <div class="grab"></div>
-  <h3 id="shTitle">Nuovo pescato</h3>
-  <label for="fDate">Giorno</label>
-  <input type="date" id="fDate" required>
-  <div class="two">
-    <div><label for="fKg">Chili pescati</label><input class="huge" id="fKg" inputmode="decimal" placeholder="0" autocomplete="off"></div>
-    <div><label for="fPr">Prezzo €/kg (se lo sai)</label><input class="huge" id="fPr" inputmode="decimal" placeholder="0,00" autocomplete="off"></div>
+<form class="sheet" id="sheet" novalidate aria-labelledby="shTitle">
+  <div class="shead" id="shHead">
+    <div class="grab"></div>
+    <div class="shbar"><button type="button" class="tbtn" id="fCancel">Annulla</button><h3 id="shTitle">Nuovo pescato</h3><button type="submit" class="tbtn b" id="fSave">Salva</button></div>
   </div>
-  <div class="tot"><span>Incasso del giorno</span><span id="fTot">0,00 €</span></div>
-  <div class="err" id="fErr"></div>
-  <div class="acts">
-    <button type="button" class="btn red" id="fDel" hidden>Elimina</button>
-    <button type="button" class="btn ghost" id="fCancel">Annulla</button>
-    <button type="submit" class="btn" id="fSave">Salva</button>
+  <div class="grp">
+    <label class="frow"><span>Giorno</span><input type="date" id="fDate" required></label>
+    <label class="frow"><span>Chili pescati</span><input id="fKg" inputmode="decimal" placeholder="0" autocomplete="off"></label>
+    <label class="frow"><span>Prezzo €/kg</span><input id="fPr" inputmode="decimal" placeholder="se lo sai" autocomplete="off"></label>
   </div>
+  <div class="tot"><span>Incasso del giorno</span><b id="fTot">0,00 €</b></div>
+  <div class="err" id="fErr" role="alert"></div>
+  <div class="grp del" id="fDelWrap" hidden><button type="button" class="rbtn red" id="fDel" style="text-align:center">Elimina uscita</button></div>
 </form>
 
-<div class="page" id="page">
-  <div class="top">
-    <div class="h"><h1>Archivio</h1><button class="x" id="pgClose" aria-label="Chiudi">×</button></div>
-    <div class="tabs" role="tablist">
-      <button class="on" data-t="days">Giorni</button>
-      <button data-t="years">Anni</button>
-      <button data-t="backup">Backup</button>
-      <button data-t="set">Impostazioni</button>
-    </div>
-  </div>
-  <div class="wrap" id="pgBody" style="padding-top:6px"></div>
-</div>
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status"></div>
 
 <div class="login" id="login"><div class="in">
-  <section class="hero">
-    <svg class="claw" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 92c-6-18-4-34 6-46-14-2-24-12-26-28 10 6 20 8 30 6-4-8-4-16 0-22 6 10 16 16 28 16-2 16-12 28-26 32 6 12 6 26 0 42z" fill="#fff"/></svg>
-    <div class="lab">Benvenuto in</div>
-    <div class="big" style="font-size:40px">Granchio Blu</div>
-    <div class="sub">Il registro del pescato, sempre al sicuro.</div>
-  </section>
-  <p>Accedi con il tuo account Google: il pescato viene salvato nel tuo account e lo ritrovi su qualsiasi telefono. Funziona anche senza campo, i dati partono appena torna la rete.</p>
-  <button class="gbtn" id="gLogin" type="button" disabled><svg width="22" height="22" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg><span>Accedi con Google</span></button>
+  <img class="appicon" src="icon-192.png" alt="">
+  <h1>Granchio Blu</h1>
+  <p>Il registro del pescato, sempre al sicuro. Accedi con il tuo account Google: i dati restano nel tuo account e li ritrovi su qualsiasi telefono.</p>
+  <button class="gbtn" id="gLogin" type="button" disabled><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.700 32.700 29.200 36 24 36c-6.600 0-12-5.400-12-12s5.400-12 12-12c3.100 0 5.800 1.200 7.900 3.100l5.700-5.700C34 6.100 29.300 4 24 4 12.900 4 4 12.900 4 24s8.900 20 20 20 20-8.900 20-20c0-1.300-.1-2.400-.4-3.500z"/><path fill="#FF3D00" d="M6.300 14.700l6.600 4.800C14.700 15.100 19 12 24 12c3.100 0 5.800 1.200 7.900 3.100l5.700-5.700C34 6.100 29.300 4 24 4 16.300 4 9.700 8.300 6.300 14.700z"/><path fill="#4CAF50" d="M24 44c5.200 0 9.900-2 13.400-5.200l-6.200-5.200C29.200 35.100 26.700 36 24 36c-5.200 0-9.600-3.300-11.300-8l-6.500 5C9.500 39.600 16.200 44 24 44z"/><path fill="#1976D2" d="M43.600 20.500H42V20H24v8h11.300c-.8 2.200-2.200 4.200-4.100 5.600l6.200 5.200C37 39.200 44 34 44 24c0-1.300-.1-2.400-.4-3.500z"/></svg><span>Accedi con Google</span></button>
   <div class="err" id="lErr" role="alert"></div>
+  <p class="ft">Funziona anche senza campo: i dati partono da soli appena torna la rete.</p>
 </div></div>
 
 <script type="module">
@@ -197,6 +271,7 @@ import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase
 import {getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,onAuthStateChanged,signOut} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,setDoc,deleteDoc,writeBatch,onSnapshot} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 {
+const VERSIONE='3.1';
 /* ---- Firebase ---- */
 // Su Firebase Hosting l'accesso passa dallo stesso dominio dell'app, così funziona anche su iPhone.
 const onFbHost=/\.(web\.app|firebaseapp\.com)$/.test(location.hostname);
@@ -212,14 +287,18 @@ const auth=getAuth(fbApp);auth.languageCode='it';
 let fs;try{fs=initializeFirestore(fbApp,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})})}catch(e){fs=initializeFirestore(fbApp,{})}
 
 const $=id=>document.getElementById(id);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const MESI=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+const Mese=m=>MESI[m][0].toUpperCase()+MESI[m].slice(1);
 const nf1=new Intl.NumberFormat('it-IT',{maximumFractionDigits:1});
 const nf2=new Intl.NumberFormat('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
 const eur=v=>nf2.format(v)+' €';
 const nfq=new Intl.NumberFormat('it-IT',{maximumFractionDigits:2});
-let unit='kg';try{unit=localStorage.getItem('granchio-unita')==='q'?'q':'kg'}catch(e){}
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+let unit=ls.get('granchio-unita')==='q'?'q':'kg';
 const numU=v=>unit==='q'?nfq.format(v/100):nf1.format(v);
 const uLab=()=>unit==='q'?'q':'kg';
+const uLong=()=>unit==='q'?'quintali':'kg';
 const kg=v=>numU(v)+' '+uLab();
 const pad=n=>String(n).padStart(2,'0');
 const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
@@ -227,65 +306,199 @@ const nice=s=>{const [y,m,d]=s.split('-');return +d+' '+MESI[+m-1]+' '+y};
 const niceShort=s=>{const [,m,d]=s.split('-');return +d+' '+MESI[+m-1]};
 const wd=s=>new Date(s+'T12:00').toLocaleDateString('it-IT',{weekday:'short'});
 const num=v=>{v=String(v||'').trim().replace(/\s/g,'');if(v.includes(',')){v=v.replace(/\./g,'').replace(',','.')}const n=parseFloat(v);return isFinite(n)?n:NaN};
-let rows=new Map(), user=null, col=null, unsub=null, unsynced=false, readOnly=false, tab='days', yearSel=null;
+const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const gg=n=>n+(n==1?' giorno':' giorni');
+const usc=n=>n+(n==1?' uscita':' uscite');
+let rows=new Map(), user=null, col=null, unsub=null, unsynced=false, yearSel=null, lastSaved=null, first=false;
 function valid(r){return r&&/^\d{4}-\d{2}-\d{2}$/.test(r.d)&&isFinite(r.kg)&&r.kg>0&&(r.p==null||isFinite(r.p))}
 const hasP=r=>r&&r.p!=null&&isFinite(r.p);
 const inc=r=>hasP(r)?r.kg*r.p:0;
-function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2200)}
-function sum(list){let k=0,e=0,kp=0;list.forEach(r=>{k+=r.kg;if(hasP(r)){e+=r.kg*r.p;kp+=r.kg}});return {k,e,n:list.length,avg:kp?e/kp:0,miss:list.filter(r=>!hasP(r)).length}}
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2400)}
+function sum(list){let k=0,e=0,kp=0;list.forEach(r=>{k+=r.kg;if(hasP(r)){e+=r.kg*r.p;kp+=r.kg}});return {k,e,n:list.length,avg:kp?e/kp:0}}
 function sorted(){return [...rows.values()].sort((a,b)=>a.d<b.d?1:-1)}
 function years(){const s=new Set([...rows.keys()].map(d=>+d.slice(0,4)));s.add(new Date().getFullYear());return [...s].sort((a,b)=>b-a)}
+// riscrive un pezzo di pagina solo se è cambiato, così le animazioni non ripartono a vuoto
+function setH(el,h){if(el._h===h)return false;el._h=h;el.innerHTML=h;return true}
+const CHEV='<svg width="8" height="14" viewBox="0 0 8 14" aria-hidden="true"><path d="M1 1l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+/* ---- pagine a scorrimento e barra in basso ---- */
+const pager=$('pager'),pages=[...pager.children],tabsEl=$('tabs'),pill=tabsEl.querySelector('.pill'),tbs=[...tabsEl.querySelectorAll('button')];
+let cur=0;
+function onPager(){
+  const p=pager.scrollLeft/(pager.clientWidth||1);
+  pill.style.transform='translateX('+p*100+'%)';
+  const i=Math.max(0,Math.min(tbs.length-1,Math.round(p)));
+  if(i!==cur){cur=i;tbs.forEach((b,k)=>{b.classList.toggle('on',k===i);b.setAttribute('aria-current',k===i?'page':'false')})}
+}
+pager.addEventListener('scroll',onPager,{passive:true});
+function goPage(i,instant){pager.scrollTo({left:i*pager.clientWidth,behavior:instant||reduce?'auto':'smooth'})}
+tbs.forEach((b,i)=>b.onclick=()=>{if(i===cur)pages[i].scrollTo({top:0,behavior:reduce?'auto':'smooth'});else goPage(i)});
+addEventListener('resize',()=>goPage(cur,true));
+pages.forEach(pg=>pg.addEventListener('scroll',()=>pg.classList.toggle('scrolled',pg.scrollTop>50),{passive:true}));
+
+/* ---- home ---- */
+let heroShown=0,heroRaf=0;
+function paintHero(v){$('heroKg').innerHTML=numU(v)+'<small>'+uLong()+'</small>'}
+function heroTo(v){
+  cancelAnimationFrame(heroRaf);
+  const from=heroShown;
+  if(reduce||Math.abs(from-v)<.05){heroShown=v;paintHero(v);return}
+  const t0=performance.now(),D=800;
+  const step=t=>{const k=Math.min(1,(t-t0)/D),e=1-Math.pow(1-k,4);heroShown=from+(v-from)*e;paintHero(k<1?Math.round(heroShown):v);if(k<1)heroRaf=requestAnimationFrame(step);else heroShown=v};
+  heroRaf=requestAnimationFrame(step);
+}
+function rowHtml(r,i){return `<div class="row${r.d===lastSaved?' flash':''}" data-d="${r.d}" role="button" tabindex="0" style="--i:${Math.min(i||0,10)}"><div class="l"><b>${wd(r.d)} ${nice(r.d)}</b>${hasP(r)?`<span>${nf2.format(r.p)} €/kg</span>`:''}</div><div class="r"><b>${kg(r.kg)}</b>${hasP(r)?`<span>${eur(inc(r))}</span>`:''}</div>${CHEV}</div>`}
+function bindRows(el){el.querySelectorAll('.row').forEach(n=>{const go=()=>openSheet(rows.get(n.dataset.d));n.onclick=go;n.onkeydown=e=>{if(e.key==='Enter')go()}})}
 
 function render(){
   const now=new Date(),t=iso(now),Y=now.getFullYear(),md=t.slice(5);
   $('todayLbl').textContent=now.toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
   const all=sorted();
   const ytd=y=>all.filter(r=>r.d>=y+'-01-01'&&r.d<=y+'-'+md);
-  const cur=sum(ytd(Y));
+  const c=sum(ytd(Y));
   $('heroLab').textContent='Totale '+Y+' fino a oggi';
-  $('heroKg').innerHTML=numU(cur.k)+'<small>'+(unit==='q'?'quintali':'kg')+'</small>';
-  $('heroSub').textContent=cur.n?cur.n+(cur.n==1?' uscita':' uscite')+' · media '+kg(cur.k/cur.n)+' a uscita':'Nessuna uscita registrata quest\'anno';
+  heroTo(c.k);
+  $('heroSub').textContent=c.n?usc(c.n)+' · media '+kg(c.k/c.n)+' a uscita':'Nessuna uscita registrata quest\'anno';
   const prev=sum(ytd(Y-1)),chip=$('heroChip');
-  if(prev.k>0){const p=(cur.k-prev.k)/prev.k*100;chip.hidden=false;chip.textContent=(p>=0?'+':'')+nf1.format(p)+'% rispetto al '+(Y-1)+' alla stessa data'}else chip.hidden=true;
+  if(prev.k>0){const p=(c.k-prev.k)/prev.k*100;chip.hidden=false;chip.textContent=(p>=0?'+':'')+nf1.format(p)+'% rispetto al '+(Y-1)+' alla stessa data'}else chip.hidden=true;
 
   const td=rows.get(t),T=$('today');
-  if(td){T.className='today';T.innerHTML=`<div><b>${numU(td.kg)}</b><span>${unit==='q'?'quintali':'kg'}</span></div><div><b>${hasP(td)?nf2.format(td.p):'—'}</b><span>€/kg</span></div><div><b>${hasP(td)?nf2.format(inc(td)):'—'}</b><span>€ incasso</span></div>`;T.onclick=()=>openSheet(td)}
-  else{T.className='today empty';T.innerHTML='<span>Nessun pescato inserito oggi</span><button class="btn" type="button">Inserisci</button>';T.onclick=()=>openSheet()}
+  if(td){setH(T,`<div class="stat3 tap" role="button" tabindex="0"><div><b>${numU(td.kg)}</b><span>${uLong()}</span></div><div><b>${hasP(td)?nf2.format(td.p):'—'}</b><span>€/kg</span></div><div><b>${hasP(td)?nf2.format(inc(td)):'—'}</b><span>€ incasso</span></div></div>`);T.onclick=()=>openSheet(rows.get(t))}
+  else{setH(T,'<div class="empty"><span>Nessun pescato inserito oggi</span><button class="pillbtn" type="button">Inserisci</button></div>');T.onclick=()=>openSheet()}
 
-  $('cmpTitle').innerHTML='Lo stesso giorno negli anni <em>· '+niceShort(t)+'</em>';
+  $('cmpTitle').textContent='Il '+niceShort(t)+' negli anni';
   const ys=years(),data=ys.map(y=>({y,r:rows.get(y+'-'+md),tot:sum(ytd(y)).k})),mx=Math.max(1,...data.map(d=>d.r?d.r.kg:0));
-  $('cmp').innerHTML=data.length<2&&!td?'<div class="none">Il confronto comparirà quando ci saranno dati di più anni.</div>':data.map(d=>{
+  setH($('cmp'),data.length<2&&!td?'<div class="none">Il confronto comparirà quando ci saranno dati di più anni.</div>':data.map((d,i)=>{
     const k=d.r?d.r.kg:0;
-    const main=d.r?kg(k):'<span style="color:var(--mute);font-weight:500">nessuna uscita</span>';
-    const info=d.r?'':(d.y===Y?'non ancora inserito':'');
-    return `<div class="yr${d.y===Y?' cur':''}"><span class="y">${d.y}</span><div class="bar"><i style="width:${k/mx*100}%"></i></div><span class="v">${main}</span><div class="d"><span>${info}</span><span>totale al ${niceShort(t)}: ${kg(d.tot)}</span></div></div>`}).join('');
+    const main=d.r?kg(k):'<span style="color:var(--mute);font-weight:400">'+(d.y===Y?'non ancora inserito':'nessuna uscita')+'</span>';
+    return `<div class="yr${d.y===Y?' cur':''}" style="--i:${Math.min(i,10)}"><div class="t"><b>${d.y}</b><span>${main}</span></div><div class="bar"><i style="width:${k/mx*100}%"></i></div><div class="d"><span>Totale al ${niceShort(t)}</span><span>${kg(d.tot)}</span></div></div>`}).join(''));
 
-  $('recent').innerHTML=all.length?all.slice(0,5).map(rowHtml).join(''):'<div class="none">Ancora nessuna uscita. Tocca il + per inserire la prima.</div>';
-  bindRows($('recent'));
-  if($('page').classList.contains('on'))renderPage();
+  if(setH($('recent'),all.length?all.slice(0,5).map(rowHtml).join(''):'<div class="none">Ancora nessuna uscita. Tocca il + per inserire la prima.</div>'))bindRows($('recent'));
+  renderDays(all);renderYears(all);
+  const o=$('delAllOpt');if(o)o.textContent='Tutti i dati ('+gg(rows.size)+')';
 }
-function rowHtml(r){return `<div class="row" data-d="${r.d}" role="button" tabindex="0"><span class="dt">${wd(r.d)} ${nice(r.d)}</span><span class="kg">${kg(r.kg)}</span><span class="pr">${hasP(r)?nf2.format(r.p)+' €/kg':''}</span><span class="eu">${hasP(r)?eur(inc(r)):''}</span></div>`}
-function bindRows(el){el.querySelectorAll('.row').forEach(n=>{const go=()=>openSheet(rows.get(n.dataset.d));n.onclick=go;n.onkeydown=e=>{if(e.key==='Enter')go()}})}
+
+/* ---- uscite e anni ---- */
+function renderDays(all){
+  const ys=years();if(!ys.includes(yearSel))yearSel=ys[0];
+  if(setH($('yChips'),ys.map(y=>`<button type="button" class="chip2${y===yearSel?' on':''}" data-y="${y}">${y}</button>`).join('')))
+    $('yChips').querySelectorAll('button').forEach(b=>b.onclick=()=>{yearSel=+b.dataset.y;renderDays(sorted())});
+  const list=all.filter(r=>r.d.startsWith(yearSel+'-')),s=sum(list);
+  const groups={};list.forEach(r=>(groups[r.d.slice(5,7)]=groups[r.d.slice(5,7)]||[]).push(r));
+  const h=`<div class="stat3"><div><b>${numU(s.k)}</b><span>${uLong()} nel ${yearSel}</span></div><div><b>${s.n}</b><span>uscite</span></div><div><b>${s.n?numU(s.k/s.n):'—'}</b><span>media ${uLab()}</span></div></div>`+
+    (list.length?Object.keys(groups).sort().reverse().map(m=>{const g=sum(groups[m]);return `<div class="mo">${Mese(+m-1)}<span>${kg(g.k)} · ${usc(g.n)}</span></div><div class="grp">${groups[m].map(rowHtml).join('')}</div>`}).join(''):'<div class="grp" style="margin-top:16px"><div class="none">Nessuna uscita in questo anno.</div></div>');
+  if(setH($('daysBody'),h))bindRows($('daysBody'));
+}
+function renderYears(all){
+  const Y=new Date().getFullYear();
+  const data=years().map(y=>({y,...sum(all.filter(r=>r.d.startsWith(y+'-')))})).filter(d=>d.n||d.y===Y);
+  const best=Math.max(0,...data.map(d=>d.k));
+  setH($('yearsBody'),`<div class="grp">${data.map((d,i)=>`<div class="yr${d.y===Y?' cur':''}" style="--i:${Math.min(i,10)}"><div class="t"><b>${d.y}${d.k===best&&best>0&&data.length>1?'<span class="badge">anno migliore</span>':''}</b><span>${kg(d.k)}</span></div><div class="bar"><i style="width:${best?d.k/best*100:0}%"></i></div><div class="d"><span>${usc(d.n)}${d.n?' · media '+kg(d.k/d.n):''}</span><span>${d.e>0?eur(d.e):''}</span></div></div>`).join('')}</div><p class="ft">Gli anni sono interi, dal 1° gennaio al 31 dicembre. L'incasso conta solo le uscite con il prezzo.</p>`);
+}
+
+/* ---- impostazioni ---- */
+const TINTS=[['#1b5fd0','Blu granchio'],['#0b8a9c','Laguna'],['#1f9d55','Alga'],['#e8472a','Corallo'],['#8a5cf6','Viola'],['#5b6472','Ardesia']];
+function seg(id,opts,val){const i=Math.max(0,opts.findIndex(o=>o[0]===val));return `<div class="seg" id="${id}" style="--n:${opts.length};--i:${i}"><i></i>${opts.map((o,k)=>`<button type="button" data-v="${o[0]}"${k===i?' class="on"':''}>${o[1]}</button>`).join('')}</div>`}
+function bindSeg(id,fn){const el=$(id),bs=[...el.querySelectorAll('button')];bs.forEach((b,i)=>b.onclick=()=>{el.style.setProperty('--i',i);bs.forEach(x=>x.classList.toggle('on',x===b));fn(b.dataset.v)})}
+function renderSet(){
+  const B=$('setBody');
+  if(!user){B.innerHTML='';return}
+  const name=user.displayName||'Account Google',tema=ls.get('granchio-tema')||'auto',tint=(ls.get('granchio-colore')||TINTS[0][0]).toLowerCase();
+  const av=user.photoURL?`<img src="${esc(user.photoURL)}" alt="" referrerpolicy="no-referrer">`:`<div class="av">${esc(name[0].toUpperCase())}</div>`;
+  B.innerHTML=`
+    <div class="grp"><div class="acct">${av}<div class="n"><b>${esc(name)}</b><span>${esc(user.email||'')}</span></div></div><button type="button" class="rbtn red" id="outBtn">Esci</button></div>
+    <p class="ft">Il pescato è salvato in questo account. Su un telefono nuovo basta accedere con lo stesso account per ritrovare tutto.</p>
+    <p class="cap">Aspetto</p>
+    <div class="grp"><div class="pad">${seg('segTema',[['auto','Automatico'],['light','Chiaro'],['dark','Scuro']],tema)}</div><div class="sw" id="sw">${TINTS.map(c=>`<button type="button" style="--c:${c[0]}" data-c="${c[0]}" aria-label="${c[1]}" title="${c[1]}"${c[0]===tint?' class="on"':''}></button>`).join('')}</div></div>
+    <p class="ft">Il colore vale per questo telefono.</p>
+    <p class="cap">Unità di misura</p>
+    <div class="grp"><div class="pad">${seg('segUnit',[['kg','Chilogrammi'],['q','Quintali']],unit)}</div></div>
+    <p class="ft">Come mostrare il pescato in tutta l'app. I chili si inseriscono sempre in kg.</p>
+    <p class="cap">Excel</p>
+    <div class="grp"><button type="button" class="rbtn" id="xlExp">Esporta in Excel</button><label class="rbtn">Importa dal file dei conferimenti<input type="file" id="xlFile" accept=".xlsx,.xls,.xlsm,.ods,.csv"></label></div>
+    <div class="err" id="xlExpErr"></div><div id="xlOut"></div>
+    <p class="ft">L'esportazione crea un file .xlsx con giorno e chili. L'importazione legge la data (colonna B), descrMateriaPrima (J) e qtaQuota (S); prende tutte le righe tranne VONGOLE e SEMINAVONGOLE e somma quelle dello stesso giorno.</p>
+    <p class="cap">Copia di sicurezza</p>
+    <div class="grp"><button type="button" class="rbtn" id="cpBtn">Copia tutte le uscite come testo</button><div><textarea id="imTxt" placeholder='Incolla qui un backup, es. [{"d":"2025-06-12","kg":38.5,"p":6.2}]'></textarea></div><label class="rbtn">Scegli un file di backup<input type="file" id="imFile" accept=".json,.txt,application/json"></label><button type="button" class="rbtn" id="imBtn" style="font-weight:600">Importa il backup incollato</button></div>
+    <div class="err" id="imErr"></div>
+    <p class="ft">Le uscite importate con lo stesso giorno di una già presente la sostituiscono.</p>
+    <p class="cap">Elimina dati</p>
+    <div class="grp">
+      <label class="fld"><span>Cosa eliminare</span><select id="delK"><option value="">Scegli…</option><option value="d">Un giorno</option><option value="m">Un mese</option><option value="y">Un anno intero</option><option value="all" id="delAllOpt">Tutti i dati (${gg(rows.size)})</option></select></label>
+      <label class="fld" id="delWrap" hidden><span id="delYLbl">Quale</span><select id="delY"></select></label>
+      <label class="fld"><span>Conferma</span><input id="delTxt" autocomplete="off" autocapitalize="characters" placeholder="scrivi ELIMINA"></label>
+      <button type="button" class="rbtn red" id="delGo" disabled>Elimina definitivamente</button>
+    </div>
+    <div class="err" id="delErr"></div>
+    <p class="foot">Granchio Blu ${VERSIONE}</p>`;
+  let outArm=false;
+  $('outBtn').onclick=async()=>{
+    if(unsynced&&!outArm){outArm=true;$('outBtn').textContent='Dati non ancora inviati: tocca ancora per uscire';return}
+    try{await signOut(auth)}catch(e){toast('Uscita non riuscita, riprova')}
+  };
+  bindSeg('segTema',v=>{const R=document.documentElement;if(v==='auto')delete R.dataset.theme;else R.dataset.theme=v;ls.set('granchio-tema',v)});
+  bindSeg('segUnit',v=>{unit=v;ls.set('granchio-unita',v);render()});
+  const sws=[...$('sw').querySelectorAll('button')];
+  sws.forEach(b=>b.onclick=()=>{document.documentElement.style.setProperty('--tint',b.dataset.c);ls.set('granchio-colore',b.dataset.c);sws.forEach(x=>x.classList.toggle('on',x===b))});
+  $('xlExp').onclick=exportXlsx;
+  $('xlFile').onchange=e=>{const f=e.target.files[0];if(f)readExcel(f)};
+  $('cpBtn').onclick=async()=>{
+    const json=JSON.stringify(sorted().map(r=>({d:r.d,kg:r.kg,p:r.p})));
+    try{await navigator.clipboard.writeText(json);toast('Backup copiato: incollalo in una nota o in una mail')}catch(e){$('imTxt').value=json;$('imTxt').select();toast('Seleziona e copia il testo a mano')}
+  };
+  $('imFile').onchange=async e=>{const f=e.target.files[0];if(f)$('imTxt').value=await f.text()};
+  $('imBtn').onclick=async()=>{
+    let a;try{a=JSON.parse($('imTxt').value)}catch(e){$('imErr').textContent='Il testo non è un backup valido.';return}
+    if(!Array.isArray(a)){$('imErr').textContent='Il testo non è un backup valido.';return}
+    const ok=a.map(r=>({d:String(r.d),kg:+r.kg,p:r.p==null||r.p===''?null:+r.p})).filter(valid);
+    if(!ok.length){$('imErr').textContent='Nel testo non ci sono uscite valide.';return}
+    await many(ok,'put');
+    $('imErr').textContent='';$('imTxt').value='';toast(usc(ok.length)+' importate');render();
+  };
+  const keys=()=>[...rows.keys()].sort().reverse();
+  const cnt=p=>keys().filter(d=>d.startsWith(p)).length;
+  const target=()=>{const k=$('delK').value;return k==='all'?'all':(k&&$('delY').value)||''};
+  const chk=()=>{$('delGo').disabled=!(target()&&$('delTxt').value.trim().toUpperCase()==='ELIMINA')};
+  $('delK').onchange=()=>{
+    const k=$('delK').value;let opts=[];
+    if(k==='d')opts=keys().map(d=>{const r=rows.get(d);return [d,wd(d)+' '+nice(d)+' · '+kg(r.kg)]});
+    else if(k==='m')opts=[...new Set(keys().map(d=>d.slice(0,7)))].map(m=>[m+'-',Mese(+m.slice(5)-1)+' '+m.slice(0,4)+' ('+gg(cnt(m+'-'))+')']);
+    else if(k==='y')opts=[...new Set(keys().map(d=>d.slice(0,4)))].map(y=>[y+'-','Tutto il '+y+' ('+gg(cnt(y+'-'))+')']);
+    $('delYLbl').textContent=k==='d'?'Quale giorno':k==='m'?'Quale mese':'Quale anno';
+    $('delY').innerHTML=opts.length?'<option value="">Scegli…</option>'+opts.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join(''):'<option value="">Nessun dato</option>';
+    $('delWrap').hidden=!(k&&k!=='all');
+    chk();
+  };
+  $('delY').onchange=chk;$('delTxt').oninput=chk;
+  $('delGo').onclick=async()=>{
+    const t=target();if(!t)return;
+    const list=[...rows.keys()].filter(d=>t==='all'||(t.length===10?d===t:d.startsWith(t)));
+    await many(list,'del');
+    $('delK').value='';$('delTxt').value='';$('delWrap').hidden=true;chk();
+    render();toast(list.length==1?'1 giorno eliminato':list.length+' giorni eliminati');
+  };
+}
 
 /* ---- inserimento ---- */
 let editing=null,delArm=false;
 function openSheet(r){
-  if(readOnly){toast('Puoi solo consultare i dati');return}
+  if(!user)return;
   editing=r||null;delArm=false;
   $('shTitle').textContent=r?'Modifica uscita':'Nuovo pescato';
   $('fDate').value=r?r.d:iso(new Date());
   $('fKg').value=r?String(r.kg).replace('.',','):'';
   const lp=sorted().find(hasP);$('fPr').value=r?(hasP(r)?nf2.format(r.p):''):(lp?nf2.format(lp.p):'');
-  $('fDel').hidden=!r;$('fDel').textContent='Elimina';$('fErr').textContent='';
+  $('fDelWrap').hidden=!r;$('fDel').textContent='Elimina uscita';$('fErr').textContent='';
   upTot();$('scrim').classList.add('on');$('sheet').classList.add('on');
-  setTimeout(()=>$('fKg').focus(),250);
+  setTimeout(()=>$('fKg').focus(),350);
 }
-function closeSheet(){$('scrim').classList.remove('on');$('sheet').classList.remove('on');editing=null}
+function closeSheet(){$('scrim').classList.remove('on');$('sheet').classList.remove('on');editing=null;if(document.activeElement&&$('sheet').contains(document.activeElement))document.activeElement.blur()}
 function upTot(){const k=num($('fKg').value),p=num($('fPr').value);$('fTot').textContent=eur(isFinite(k)&&isFinite(p)?k*p:0)}
 $('fKg').oninput=upTot;$('fPr').oninput=upTot;
-$('fDate').onchange=()=>{const ex=rows.get($('fDate').value);if(ex&&(!editing||editing.d!==ex.d)){$('fErr').textContent='Esiste già un\'uscita in questo giorno: salvando la sostituisci.'}else $('fErr').textContent=''};
+$('fDate').onchange=()=>{const ex=rows.get($('fDate').value);$('fErr').textContent=ex&&(!editing||editing.d!==ex.d)?'Esiste già un\'uscita in questo giorno: salvando la sostituisci.':''};
 $('addBtn').onclick=()=>{openSheet();$('fDate').onchange()};
 $('fCancel').onclick=closeSheet;$('scrim').onclick=closeSheet;
+addEventListener('keydown',e=>{if(e.key==='Escape'&&$('sheet').classList.contains('on'))closeSheet()});
 $('sheet').onsubmit=async e=>{
   e.preventDefault();
   const d=$('fDate').value,k=num($('fKg').value),p=num($('fPr').value);
@@ -294,6 +507,7 @@ $('sheet').onsubmit=async e=>{
   if($('fPr').value.trim()&&!(p>=0)){$('fErr').textContent='Il prezzo non è un numero valido.';return}
   const r={d,kg:Math.round(k*100)/100,p:p>=0?Math.round(p*100)/100:null};
   const old=editing;closeSheet();
+  lastSaved=d;setTimeout(()=>{lastSaved=null},1600);
   if(old&&old.d!==d)await del(old.d,true);
   await put(r);toast('Salvato: '+kg(r.kg)+' il '+niceShort(d));
 };
@@ -302,84 +516,12 @@ $('fDel').onclick=async()=>{
   if(Date.now()-delArm<800)return;
   const d=editing.d;closeSheet();await del(d);toast('Uscita eliminata');
 };
-
-/* ---- archivio ---- */
-$('menuBtn').onclick=()=>{$('page').classList.add('on');renderPage()};
-$('pgClose').onclick=()=>$('page').classList.remove('on');
-document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));renderPage()});
-function renderPage(){
-  const B=$('pgBody'),all=sorted(),ys=years();
-  if(tab==='days'){
-    if(!ys.includes(yearSel))yearSel=ys[0];
-    const list=all.filter(r=>r.d.startsWith(yearSel+'-'));
-    const groups={};list.forEach(r=>(groups[r.d.slice(5,7)]=groups[r.d.slice(5,7)]||[]).push(r));
-    B.innerHTML=`<label for="ySel">Anno</label><select id="ySel">${ys.map(y=>`<option ${y===yearSel?'selected':''}>${y}</option>`).join('')}</select>`+
-      (list.length?Object.keys(groups).sort().reverse().map(m=>{const s=sum(groups[m]);return `<div class="mo">${MESI[+m-1][0].toUpperCase()+MESI[+m-1].slice(1)}<span>${kg(s.k)} · ${s.n} uscite</span></div>`+groups[m].map(rowHtml).join('')}).join(''):'<div class="none">Nessuna uscita in questo anno.</div>');
-    $('ySel').onchange=e=>{yearSel=+e.target.value;renderPage()};bindRows(B);
-  }else if(tab==='years'){
-    const data=ys.map(y=>({y,...sum(all.filter(r=>r.d.startsWith(y+'-')))})).filter(d=>d.n||d.y===new Date().getFullYear());
-    const best=Math.max(0,...data.map(d=>d.k));
-    B.innerHTML=`<table><thead><tr><th>Anno</th><th>Pescato</th><th>Uscite</th><th>Media a uscita</th></tr></thead><tbody>${data.map(d=>`<tr><td>${d.y}${d.k===best&&best>0?' <span style="color:var(--coral)">●</span>':''}</td><td>${kg(d.k)}</td><td>${d.n}</td><td>${d.n?kg(d.k/d.n):'—'}</td></tr>`).join('')}</tbody></table><p class="note">● anno migliore per chili pescati. Gli anni sono interi, dal 1° gennaio al 31 dicembre.</p>`;
-  }else if(tab==='set'){
-    const ph=user&&user.photoURL?`<img src="${esc(user.photoURL)}" alt="" referrerpolicy="no-referrer">`:'';
-    B.innerHTML=`<h2>Account</h2><div class="acct">${ph}<div><b>${esc(user?(user.displayName||'Account Google'):'')}</b><span>${esc(user?user.email||'':'')}</span></div></div><p class="none" style="padding-bottom:0">Il pescato è salvato in questo account. Su un telefono nuovo basta accedere con lo stesso account per ritrovare tutto.</p><div class="acts"><button type="button" class="btn ghost" id="outBtn">Esci</button></div>
-      <h2>Unità di misura</h2><p class="none" style="padding-top:0">Come mostrare il pescato in tutta l'app. I chili si inseriscono sempre in kg.</p><div class="opts">${[['kg','Chilogrammi','es. 1.250 kg'],['q','Quintali','es. 12,5 q']].map(o=>`<button type="button" class="opt${unit===o[0]?' on':''}" data-u="${o[0]}"><b>${o[1]}</b><span>${o[2]}</span></button>`).join('')}</div><h2>Esporta in Excel</h2><p class="none" style="padding-top:0">Un file .xlsx con due colonne: giorno e chili pescati (${rows.size} giorni). Sul telefono si apre la condivisione: scegli "Salva su File", Mail o WhatsApp. Fallo ogni tanto come copia di sicurezza.</p><div class="acts"><button type="button" class="btn" id="xlExp">Scarica file Excel</button></div><div class="err" id="xlExpErr"></div>
-      <h2>Elimina dati</h2><p class="none" style="padding-top:0">Puoi cancellare un giorno, un mese, un anno intero o tutto. Prima conviene scaricare il file Excel.</p>
-      <label for="delK">Cosa eliminare</label><select id="delK"><option value="">Scegli…</option><option value="d">Un giorno</option><option value="m">Un mese</option><option value="y">Un anno intero</option><option value="all">Tutti i dati (${rows.size} giorni)</option></select>
-      <div id="delWrap" hidden><label for="delY" id="delYLbl">Quale</label><select id="delY"></select></div>
-      <label for="delTxt">Per confermare scrivi ELIMINA</label><input id="delTxt" autocomplete="off" autocapitalize="characters" placeholder="ELIMINA">
-      <div class="acts"><button type="button" class="btn red" id="delGo" disabled>Elimina definitivamente</button></div><div class="err" id="delErr"></div>`;
-    $('xlExp').onclick=exportXlsx;
-    let outArm=false;
-    $('outBtn').onclick=async()=>{
-      if(unsynced&&!outArm){outArm=true;$('outBtn').textContent='Dati non ancora inviati: tocca ancora per uscire';return}
-      try{await signOut(auth)}catch(e){toast('Uscita non riuscita, riprova')}
-    };
-    const keys=()=>[...rows.keys()].sort().reverse();
-    const cnt=p=>keys().filter(d=>d.startsWith(p)).length;
-    const gg=n=>n+(n==1?' giorno':' giorni');
-    const target=()=>{const k=$('delK').value;return k==='all'?'all':(k&&$('delY').value)||''};
-    const chk=()=>{$('delGo').disabled=!(target()&&$('delTxt').value.trim().toUpperCase()==='ELIMINA')};
-    $('delK').onchange=()=>{
-      const k=$('delK').value;let opts=[];
-      if(k==='d')opts=keys().map(d=>{const r=rows.get(d);return [d,wd(d)+' '+nice(d)+' · '+kg(r.kg)]});
-      else if(k==='m')opts=[...new Set(keys().map(d=>d.slice(0,7)))].map(m=>{const n=MESI[+m.slice(5)-1];return [m+'-',n[0].toUpperCase()+n.slice(1)+' '+m.slice(0,4)+' ('+gg(cnt(m+'-'))+')']});
-      else if(k==='y')opts=[...new Set(keys().map(d=>d.slice(0,4)))].map(y=>[y+'-','Tutto il '+y+' ('+gg(cnt(y+'-'))+')']);
-      $('delYLbl').textContent=k==='d'?'Quale giorno':k==='m'?'Quale mese':'Quale anno';
-      $('delY').innerHTML='<option value="">Scegli…</option>'+opts.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('');
-      $('delWrap').hidden=!(k&&k!=='all');
-      if(k&&k!=='all'&&!opts.length)$('delY').innerHTML='<option value="">Nessun dato</option>';
-      chk();
-    };
-    $('delY').onchange=chk;$('delTxt').oninput=chk;
-    $('delGo').onclick=async()=>{
-      if(readOnly){$('delErr').textContent='Puoi solo consultare i dati.';return}
-      const t=target();if(!t)return;
-      const list=[...rows.keys()].filter(d=>t==='all'||(t.length===10?d===t:d.startsWith(t)));
-      $('delGo').disabled=true;$('delGo').textContent='Eliminazione…';
-      await many(list,'del');
-      render();toast(list.length==1?'1 giorno eliminato':list.length+' giorni eliminati');
-    };
-    B.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{unit=b.dataset.u;try{localStorage.setItem('granchio-unita',unit)}catch(e){}render();renderPage()});
-  }else{
-    const json=JSON.stringify(all.map(r=>({d:r.d,kg:r.kg,p:r.p})));
-    B.innerHTML=`<div class="bk"><h2>Importa da Excel</h2><p>Scegli il file Excel (.xlsx, .xls) o .csv. Scegli il file dei conferimenti. Leggo solo la data (colonna B), descrMateriaPrima (J) e qtaQuota (S); prendo tutte le righe tranne quelle di VONGOLE o SEMINAVONGOLE. Più righe nello stesso giorno vengono sommate.</p><input type="file" id="xlFile" accept=".xlsx,.xls,.xlsm,.ods,.csv"><div id="xlOut"></div>
-      <h2>Copia di sicurezza</h2><p>Copia questo testo e salvalo in una nota o mandalo per email: contiene tutte le uscite (${all.length}).</p><textarea id="exTxt" readonly>${json}</textarea><div class="acts"><button class="btn" id="cpBtn" type="button">Copia</button></div>
-      <h2>Ripristina o aggiungi dati</h2><p>Incolla qui un testo di backup, oppure scegli un file. Le uscite con lo stesso giorno vengono sostituite.</p><textarea id="imTxt" placeholder='[{"d":"2025-06-12","kg":38.5,"p":6.2}]'></textarea><input type="file" id="imFile" accept=".json,.txt,application/json" style="margin-top:10px"><div class="err" id="imErr"></div><div class="acts"><button class="btn" id="imBtn" type="button">Importa</button></div></div>`;
-    $('cpBtn').onclick=async()=>{try{await navigator.clipboard.writeText(json);toast('Copiato')}catch(e){$('exTxt').select();toast('Seleziona e copia a mano')}};
-    $('xlFile').onchange=e=>{const f=e.target.files[0];if(f)readExcel(f)};
-    $('imFile').onchange=async e=>{const f=e.target.files[0];if(f)$('imTxt').value=await f.text()};
-    $('imBtn').onclick=async()=>{
-      if(readOnly){$('imErr').textContent='Puoi solo consultare i dati.';return}
-      let a;try{a=JSON.parse($('imTxt').value)}catch(e){$('imErr').textContent='Il testo non è un backup valido.';return}
-      if(!Array.isArray(a)){$('imErr').textContent='Il testo non è un backup valido.';return}
-      const ok=a.map(r=>({d:String(r.d),kg:+r.kg,p:r.p==null||r.p===''?null:+r.p})).filter(valid);
-      $('imErr').textContent='Importazione di '+ok.length+' uscite…';
-      await many(ok,'put');
-      $('imErr').textContent='';toast(ok.length+' uscite importate');render();
-    };
-  }
-}
+// la scheda si chiude anche trascinandola verso il basso
+{let y0=null,dy=0;const sh=$('sheet'),h=$('shHead');
+h.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;y0=e.clientY;dy=0;sh.style.transition='none';try{h.setPointerCapture(e.pointerId)}catch(x){}});
+h.addEventListener('pointermove',e=>{if(y0==null)return;dy=Math.max(0,e.clientY-y0);sh.style.transform='translateY('+dy+'px)'});
+const end=()=>{if(y0==null)return;y0=null;sh.style.transition='';sh.style.transform='';if(dy>90)closeSheet()};
+h.addEventListener('pointerup',end);h.addEventListener('pointercancel',end);}
 
 /* ---- export Excel ---- */
 async function exportXlsx(){
@@ -387,6 +529,7 @@ async function exportXlsx(){
   const list=sorted().reverse();
   if(!list.length){E.textContent='Non ci sono ancora dati da esportare.';return}
   btn.disabled=true;btn.textContent='Preparo il file…';
+  const done=()=>{btn.disabled=false;btn.textContent='Esporta in Excel'};
   try{
     await loadXLSX();
     const ws={},base=Date.UTC(1899,11,30);
@@ -399,14 +542,13 @@ async function exportXlsx(){
     const name='granchio-blu-pescato-'+iso(new Date())+'.xlsx',type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
     const file=new File([buf],name,{type});
     if(navigator.canShare&&navigator.canShare({files:[file]})){
-      try{await navigator.share({files:[file],title:'Granchio Blu'})}catch(e){if(e&&e.name==='AbortError'){btn.disabled=false;btn.textContent='Scarica file Excel';return}throw e}
+      try{await navigator.share({files:[file],title:'Granchio Blu'})}catch(e){if(e&&e.name==='AbortError'){done();return}throw e}
     }else{const u=URL.createObjectURL(file),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
-    try{localStorage.setItem('granchio-ultimo-export',iso(new Date()))}catch(e){}
     toast('File Excel pronto');
   }catch(e){
     E.textContent='Non sono riuscito a creare il file. Riprova.';
   }
-  btn.disabled=false;btn.textContent='Scarica file Excel';
+  done();
 }
 
 /* ---- import Excel ---- */
@@ -443,27 +585,25 @@ function parseSheet(a){
   }
   return h<0&&!any?null:{rows:out,skip};
 }
-let pending=[];
+let pend=[];
 async function readExcel(f){
-  const O=$('xlOut');O.innerHTML='<p>Lettura del file…</p>';
+  const O=$('xlOut');O.innerHTML='<p class="ft">Lettura del file…</p>';
   try{await loadXLSX()}catch(e){O.innerHTML='<div class="err">Non riesco a caricare il lettore di Excel. Controlla la connessione e riprova.</div>';return}
   let wb;try{wb=XLSX.read(await f.arrayBuffer(),{type:'array'})}catch(e){O.innerHTML='<div class="err">Questo file non si riesce ad aprire.</div>';return}
   const agg=new Map(),info=[];let skip=0,found=false;
   wb.SheetNames.forEach(n=>{const res=parseSheet(XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:null}));if(!res)return;found=true;skip+=res.skip;if(res.rows.length)info.push(n+' ('+res.rows.length+' righe)');
-    res.rows.forEach(x=>{const o=agg.get(x.d)||{d:x.d,kg:0,e:0,kp:0};o.kg+=x.kg;if(x.p!=null){o.e+=x.kg*x.p;o.kp+=x.kg}agg.set(x.d,o)})});
-  pending=[...agg.values()].map(r=>({d:r.d,kg:Math.round(r.kg*100)/100,p:r.kp?Math.round(r.e/r.kp*100)/100:null})).sort((a,b)=>a.d<b.d?-1:1);
+    res.rows.forEach(x=>{const o=agg.get(x.d)||{d:x.d,kg:0};o.kg+=x.kg;agg.set(x.d,o)})});
+  pend=[...agg.values()].map(r=>({d:r.d,kg:Math.round(r.kg*100)/100,p:null})).sort((a,b)=>a.d<b.d?-1:1);
   if(!found){O.innerHTML='<div class="err">Non trovo le colonne giuste: servono dataConferimento (B), descrMateriaPrima (J) e qtaQuota (S).</div>';return}
-  if(!pending.length){O.innerHTML='<div class="err">Ho trovato le colonne ma nessuna riga (escluse le vongole) con data e chili validi.</div>';return}
-  const s=sum(pending),over=pending.filter(r=>rows.has(r.d)).length;
-  O.innerHTML=`<div class="tot" style="display:block;font-weight:500"><b>${pending.length} uscite</b> dal ${nice(pending[0].d)} al ${nice(pending[pending.length-1].d)}<br>${kg(s.k)}<br><span style="font-size:13px;color:var(--mute)">Tutte le righe tranne le vongole${skip?' · '+skip+' righe di vongole ignorate':''}<br>Fogli: ${info.join(', ')}${over?' · '+over+' giorni già presenti verranno sostituiti':''}</span></div>`+
-    pending.slice(0,3).map(rowHtml).join('')+`<div class="acts"><button class="btn ghost" id="xlNo" type="button">Annulla</button><button class="btn" id="xlGo" type="button">Importa</button></div>`;
-  $('xlNo').onclick=()=>{pending=[];O.innerHTML='';$('xlFile').value=''};
+  if(!pend.length){O.innerHTML='<div class="err">Ho trovato le colonne ma nessuna riga (escluse le vongole) con data e chili validi.</div>';return}
+  const s=sum(pend),over=pend.filter(r=>rows.has(r.d)).length;
+  O.innerHTML=`<div class="grp xl"><div class="info"><b>${usc(pend.length)}</b> dal ${nice(pend[0].d)} al ${nice(pend[pend.length-1].d)} · ${kg(s.k)}<span>Tutte le righe tranne le vongole${skip?' · '+skip+' righe di vongole ignorate':''}<br>Fogli: ${esc(info.join(', '))}${over?' · '+gg(over)+' già presenti verranno sostituiti':''}</span></div><div class="two"><button class="rbtn" id="xlNo" type="button">Annulla</button><button class="rbtn b" id="xlGo" type="button">Importa</button></div></div>`;
+  const clear=()=>{pend=[];O.innerHTML='';$('xlFile').value=''};
+  $('xlNo').onclick=clear;
   $('xlGo').onclick=async()=>{
-    if(readOnly){toast('Puoi solo consultare i dati');return}
-    $('xlGo').disabled=true;$('xlGo').textContent='Importazione…';
-    const list=pending;pending=[];
+    const list=pend;
     await many(list.map(r=>{const o=rows.get(r.d);return hasP(o)?{...r,p:o.p}:r}),'put');
-    render();toast(list.length+' uscite importate');
+    clear();render();toast(usc(list.length)+' importate');
   };
 }
 
@@ -493,7 +633,6 @@ function fail(e){
   else toast('Salvataggio non riuscito, riprova');
 }
 function status(t){$('status').textContent=t}
-const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function syncNote(meta){
   if(!user)return '';
   if(meta&&meta.hasPendingWrites)return 'Modifiche in attesa di rete: partono da sole appena c\'è campo';
@@ -529,19 +668,20 @@ onAuthStateChanged(auth,u=>{
   user=u;rows=new Map();col=null;unsynced=false;
   if(!u){
     $('login').classList.add('on');$('gLogin').disabled=false;
-    $('page').classList.remove('on');closeSheet();render();status('');return;
+    closeSheet();goPage(0,true);render();renderSet();status('');return;
   }
   $('login').classList.remove('on');
   col=collection(fs,'users',u.uid,'uscite');
-  status('Caricamento dei dati…');render();
+  status('Caricamento dei dati…');render();renderSet();first=true;
   unsub=onSnapshot(col,{includeMetadataChanges:true},snap=>{
     const m=new Map();snap.forEach(d=>{const r=d.data();if(valid(r))m.set(r.d,{d:r.d,kg:r.kg,p:hasP(r)?r.p:null})});
     rows=m;unsynced=snap.metadata.hasPendingWrites;
+    if(first){first=false;pager.classList.add('anim');setTimeout(()=>pager.classList.remove('anim'),1600)}
     render();status(syncNote(snap.metadata));
   },e=>{status(e&&e.code==='permission-denied'?'Non hai accesso a questi dati: esci e rientra.':'Non riesco a leggere i dati, riprova più tardi.')});
 });
 
-render();
+render();onPager();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 setInterval(()=>{const t=iso(new Date());if(t!==render.day){render.day=t;render()}},60000);render.day=iso(new Date());
