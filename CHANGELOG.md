@@ -13,5 +13,6 @@ Prima versione con **accesso Google** e **dati salvati online**. Parte dalla ver
 - **Account** in *menu → Impostazioni*: mostra con quale account sei dentro e permette di uscire. Se ci sono dati non ancora inviati, chiede un secondo tocco prima di uscire.
 
 ### Modificato
+- **Nuovo indirizzo:** l'app è pubblicata su Firebase Hosting, all'indirizzo https://granchio-blu.web.app, al posto di Netlify. Ogni modifica su GitHub va online da sola.
 - Import da Excel, ripristino da backup e cancellazione di più giorni vengono inviati in blocco, così sono veloci anche con tanti dati.
 - Le librerie Firebase vengono salvate sul telefono, così l'app si apre anche senza connessione.

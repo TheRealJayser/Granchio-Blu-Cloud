@@ -198,11 +198,11 @@ import {getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirec
 import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,setDoc,deleteDoc,writeBatch,onSnapshot} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 {
 /* ---- Firebase ---- */
-// Su Netlify l'accesso passa dallo stesso dominio dell'app (vedi _redirects), così funziona anche su iPhone.
-const onNetlify=location.hostname.endsWith('.netlify.app');
+// Su Firebase Hosting l'accesso passa dallo stesso dominio dell'app, così funziona anche su iPhone.
+const onFbHost=/\.(web\.app|firebaseapp\.com)$/.test(location.hostname);
 const fbApp=initializeApp({
   apiKey:'AIzaSyC1Pc5ftVMTIPdT0sGpDNV3dNKS63bEcVE',
-  authDomain:onNetlify?location.host:'granchio-blu.firebaseapp.com',
+  authDomain:onFbHost?location.host:'granchio-blu.firebaseapp.com',
   projectId:'granchio-blu',
   storageBucket:'granchio-blu.firebasestorage.app',
   messagingSenderId:'840920901888',
