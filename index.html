@@ -324,7 +324,7 @@ import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase
 import {getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,onAuthStateChanged,signOut} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,setDoc,deleteDoc,writeBatch,onSnapshot} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 {
-const VERSIONE='3.8';
+const VERSIONE='3.9';
 /* ---- Firebase ---- */
 // Su Firebase Hosting l'accesso passa dallo stesso dominio dell'app, così funziona anche su iPhone.
 const onFbHost=/\.(web\.app|firebaseapp\.com)$/.test(location.hostname);
@@ -561,9 +561,9 @@ function renderSet(){
     <div class="err" id="xlExpErr"></div><div id="xlOut"></div>
     <p class="ft">L'esportazione crea un file .xlsx con giorno, chili, prezzo al chilo e incasso (questi ultimi due solo dove hai inserito il prezzo), più la riga del totale. Se in un giorno ci sono più vendite, ognuna ha la sua riga. L'importazione legge la data (colonna B), descrMateriaPrima (J) e qtaQuota (S); prende tutte le righe tranne VONGOLE e SEMINAVONGOLE e somma quelle dello stesso giorno.</p>
     <p class="cap">Copia di sicurezza</p>
-    <div class="grp"><button type="button" class="rbtn" id="cpBtn">Copia tutte le uscite come testo</button><div><textarea id="imTxt" placeholder='Incolla qui un backup, es. [{"d":"2025-06-12","kg":38.5,"p":6.2}]'></textarea></div><label class="rbtn">Scegli un file di backup<input type="file" id="imFile" accept=".json,.txt,application/json"></label><button type="button" class="rbtn" id="imBtn" style="font-weight:600">Importa il backup incollato</button></div>
+    <div class="grp"><button type="button" class="rbtn" id="cpBtn">Copia tutte le uscite come testo</button><div><textarea id="imTxt" placeholder='Incolla qui un backup, es. [{"d":"2025-06-12","kg":38.5,"p":6.2}]'></textarea></div><label class="rbtn">Scegli un file di backup o il file Excel dell'app<input type="file" id="imFile" accept=".json,.txt,.xlsx,.xls,application/json,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"></label><button type="button" class="rbtn" id="imBtn" style="font-weight:600">Importa il backup incollato</button></div>
     <div class="err" id="imErr"></div>
-    <p class="ft">Le uscite importate con lo stesso giorno di una già presente la sostituiscono.</p>
+    <p class="ft">Si può ripristinare il testo copiato qui sopra oppure il file Excel creato con «Esporta in Excel». Le uscite importate con lo stesso giorno di una già presente la sostituiscono.</p>
     <p class="cap">Elimina dati</p>
     <div class="grp">
       <label class="fld"><span>Cosa eliminare</span><select id="delK"><option value="">Scegli…</option><option value="d">Un giorno</option><option value="m">Un mese</option><option value="y">Un anno intero</option><option value="all" id="delAllOpt">Tutti i dati (${gg(rows.size)})</option></select></label>
@@ -588,7 +588,16 @@ function renderSet(){
     const json=JSON.stringify(sorted().flatMap(r=>r.v.map(x=>({d:r.d,kg:x.kg,p:x.p}))));
     try{await navigator.clipboard.writeText(json);toast('Backup copiato: incollalo in una nota o in una mail')}catch(e){$('imTxt').value=json;$('imTxt').select();toast('Seleziona e copia il testo a mano')}
   };
-  $('imFile').onchange=async e=>{const f=e.target.files[0];if(f)$('imTxt').value=await f.text()};
+  $('imFile').onchange=async e=>{
+    const f=e.target.files[0];if(!f)return;$('imErr').textContent='';
+    if(/\.(xlsx|xls|xlsm|ods)$/i.test(f.name)){
+      // file Excel esportato dall'app: lo trasformo nel testo del backup
+      const list=await excelToBackup(f,$('imErr'));e.target.value='';
+      if(list){$('imTxt').value=JSON.stringify(list);toast('File Excel letto: premi «Importa il backup incollato»')}
+      return;
+    }
+    $('imTxt').value=await f.text();
+  };
   $('imBtn').onclick=async()=>{
     let a;try{a=JSON.parse($('imTxt').value)}catch(e){$('imErr').textContent='Il testo non è un backup valido.';return}
     if(!Array.isArray(a)){$('imErr').textContent='Il testo non è un backup valido.';return}
@@ -785,6 +794,29 @@ function parseSheet(a){
   }
   return h<0&&!any?null:{rows:out,skip};
 }
+// file Excel creato da «Esporta in Excel» (colonne Giorno, Kg, Prezzo €/kg, Incasso €)
+function parseAppExport(a){
+  for(let i=0;i<Math.min(10,a.length);i++){
+    const r=(a[i]||[]).map(low),cD=r.indexOf('giorno'),cK=r.indexOf('kg');
+    if(cD<0||cK<0)continue;
+    const cP=r.findIndex(x=>/^prezzo/.test(x)),out=[];
+    for(let j=i+1;j<a.length;j++){const row=a[j]||[];
+      const d=toIso(row[cD]),k=toNum(row[cK]),pv=cP>=0?row[cP]:null,p=pv==null||pv===''?null:toNum(pv);
+      if(d&&k>0)out.push({d,kg:r2(k),p:p!=null&&p>=0?r2(p):null});
+    }
+    return out;
+  }
+  return null;
+}
+async function excelToBackup(f,E){
+  try{await loadXLSX()}catch(e){E.textContent='Non riesco a caricare il lettore di Excel. Controlla la connessione e riprova.';return null}
+  let wb;try{wb=XLSX.read(await f.arrayBuffer(),{type:'array'})}catch(e){E.textContent='Questo file non si riesce ad aprire.';return null}
+  let out=null;
+  wb.SheetNames.forEach(n=>{const r=parseAppExport(XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:null}));if(r)out=(out||[]).concat(r)});
+  if(!out){E.textContent='Questo file Excel non è un\'esportazione dell\'app Granchio Blu (servono le colonne Giorno e Kg).';return null}
+  if(!out.length){E.textContent='Nel file non ci sono uscite valide.';return null}
+  return out;
+}
 let pend=[];
 async function readExcel(f){
   const O=$('xlOut');O.innerHTML='<p class="ft">Lettura del file…</p>';
@@ -794,7 +826,11 @@ async function readExcel(f){
   wb.SheetNames.forEach(n=>{const res=parseSheet(XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:null}));if(!res)return;found=true;skip+=res.skip;if(res.rows.length)info.push(n+' ('+res.rows.length+' righe)');
     res.rows.forEach(x=>{const o=agg.get(x.d)||{d:x.d,kg:0};o.kg+=x.kg;agg.set(x.d,o)})});
   pend=[...agg.values()].map(r=>({d:r.d,kg:Math.round(r.kg*100)/100,p:null})).sort((a,b)=>a.d<b.d?-1:1);
-  if(!found){O.innerHTML='<div class="err">Non trovo le colonne giuste: servono dataConferimento (B), descrMateriaPrima (J) e qtaQuota (S).</div>';return}
+  if(!found){
+    let app=null;wb.SheetNames.forEach(n=>{const r=parseAppExport(XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:null}));if(r)app=(app||[]).concat(r)});
+    $('xlFile').value='';
+    if(app&&app.length){$('imTxt').value=JSON.stringify(app);O.innerHTML='<div class="err" style="color:var(--mute)">Questo è un file esportato dall\'app, non quello dei conferimenti: l\'ho messo qui sotto in <b>Copia di sicurezza</b>. Premi «Importa il backup incollato» per ripristinarlo.</div>';return}
+    O.innerHTML='<div class="err">Non trovo le colonne giuste: servono dataConferimento (B), descrMateriaPrima (J) e qtaQuota (S).</div>';return}
   if(!pend.length){O.innerHTML='<div class="err">Ho trovato le colonne ma nessuna riga (escluse le vongole) con data e chili validi.</div>';return}
   const s=sum(pend),multi=pend.filter(r=>nv(rows.get(r.d))>1).length,over=pend.filter(r=>rows.has(r.d)).length-multi;
   O.innerHTML=`<div class="grp xl"><div class="info"><b>${usc(pend.length)}</b> dal ${nice(pend[0].d)} al ${nice(pend[pend.length-1].d)} · ${kg(s.k)}<span>Tutte le righe tranne le vongole${skip?' · '+skip+' righe di vongole ignorate':''}<br>Fogli: ${esc(info.join(', '))}${over?' · '+gg(over)+' già presenti verranno sostituiti':''}${multi?' · '+gg(multi)+' con più vendite restano come sono':''}</span></div><div class="two"><button class="rbtn" id="xlNo" type="button">Annulla</button><button class="rbtn b" id="xlGo" type="button">Importa</button></div></div>`;

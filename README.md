@@ -26,7 +26,7 @@ Questa versione aggiunge l'**accesso con Google**: il pescato viene salvato onli
 - 🔁 **Lo stesso giorno negli anni** – il pescato di oggi messo a confronto con lo stesso giorno di ogni anno precedente.
 - 🗂️ **Uscite** – elenco giorno per giorno diviso per mese (con chili, uscite e incasso di ogni mese), oppure settimana per settimana, con il riepilogo dell'anno: chili, uscite, incasso, media in € a uscita e prezzo medio al chilo.
 - 📈 **Grafico degli anni** – i chili accumulati dall'inizio dell'anno, una linea per anno: si scorre col dito per leggere i valori.
-- 📊 **Excel** – esporta un file `.xlsx` con giorno, chili, prezzo e incasso; importa il file dei conferimenti (legge tutte le righe tranne *VONGOLE* e *SEMINAVONGOLE*, e somma più righe nello stesso giorno).
+- 📊 **Excel** – esporta un file `.xlsx` con giorno, chili, prezzo e incasso; il file esportato si può usare anche come copia di sicurezza e ripristinare; importa il file dei conferimenti (legge tutte le righe tranne *VONGOLE* e *SEMINAVONGOLE*, e somma più righe nello stesso giorno).
 - 🎨 **Grafica iOS e personalizzazione** – barra in basso a scorrimento, animazioni, tema automatico, chiaro o scuro e sei colori a scelta.
 - ⚖️ **Chili o quintali** – l'unità di misura si sceglie nelle impostazioni.
 - 🛡️ **Cancellazione protetta** – un giorno si cancella con due tocchi; per eliminare un mese, un anno o tutto serve scrivere `ELIMINA`.

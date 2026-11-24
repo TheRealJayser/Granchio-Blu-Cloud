@@ -2,6 +2,12 @@
 
 Tutti gli aggiornamenti dell'app Granchio Blu (versione con accesso Google), dal più recente.
 
+## Versione 3.9 — 24 novembre 2026
+
+### Corretto
+- **Ripristino dal file Excel dell'app:** il file creato con *Esporta in Excel* non si poteva ripristinare, perché il pulsante della copia di sicurezza accettava solo file di testo e quello dei conferimenti legge un altro formato. Ora *Scegli un file di backup o il file Excel dell'app* accetta anche il file `.xlsx` esportato: giorno, chili e prezzo vengono letti e basta premere **Importa il backup incollato**. Più righe con lo stesso giorno diventano vendite di quel giorno.
+- Se il file Excel dell'app viene scelto per errore in *Importa dal file dei conferimenti*, l'app lo riconosce e lo prepara per il ripristino.
+
 ## Versione 3.8 — 24 novembre 2026
 
 ### Aggiunto
