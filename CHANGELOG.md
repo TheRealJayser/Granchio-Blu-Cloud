@@ -2,6 +2,19 @@
 
 Tutti gli aggiornamenti dell'app Granchio Blu (versione con accesso Google), dal più recente.
 
+## Versione 3.6 — 24 novembre 2026
+
+### Aggiunto
+- **Più vendite nello stesso giorno:** se una parte del pescato viene venduta a un prezzo e un'altra parte a un prezzo diverso, ora si possono inserire entrambe. Con il **+** su un giorno che ha già del pescato, il nuovo inserimento si aggiunge come altra vendita invece di sostituire quello che c'era.
+- Toccando un giorno con più vendite si vede l'elenco, con chili, prezzo e incasso di ognuna e il totale del giorno: si tocca una vendita per modificarla o eliminarla, oppure si aggiunge un'altra vendita.
+- Nell'elenco delle uscite i giorni con più vendite mostrano "2 vendite · media … €/kg"; chili e incasso sono il totale del giorno.
+
+### Modificato
+- I totali, le medie e i confronti continuano a contare **un'uscita per giorno**, sommando i chili e l'incasso di tutte le vendite.
+- **Esportazione in Excel:** ogni vendita ha la sua riga, con il suo prezzo e il suo incasso.
+- **Copia di sicurezza:** il testo contiene una riga per ogni vendita; importando un backup, le righe con lo stesso giorno diventano vendite di quel giorno.
+- **Importazione dei conferimenti:** i giorni che hanno già più vendite non vengono toccati.
+
 ## Versione 3.5 — 16 novembre 2026
 
 ### Modificato

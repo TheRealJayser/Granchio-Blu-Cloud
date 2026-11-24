@@ -20,6 +20,7 @@ Questa versione aggiunge l'**accesso con Google**: il pescato viene salvato onli
 - ☁️ **Dati al sicuro** – il pescato è salvato online. Su un telefono nuovo basta accedere con lo stesso account per ritrovare tutto.
 - 📶 **Funziona anche senza campo** – senza rete l'app si apre e si può inserire il pescato: i dati partono da soli appena torna la connessione.
 - ➕ **Inserimento rapido** – il pulsante **+** apre un pannello con giorno, chili pescati e prezzo al chilo; l'incasso del giorno viene calcolato da solo.
+- 🧾 **Più vendite nello stesso giorno** – se parte del pescato va a un prezzo e parte a un altro, si inseriscono come vendite separate: il giorno mostra il totale dei chili e dell'incasso.
 - 📅 **Totale dell'anno** – i chili dal 1° gennaio a oggi, il numero di uscite, la media per uscita e la differenza rispetto all'anno precedente alla stessa data.
 - 📆 **Questa settimana** – la settimana in corso a confronto con quella scorsa e con la stessa settimana dell'anno prima, «a pari giorno».
 - 🔁 **Lo stesso giorno negli anni** – il pescato di oggi messo a confronto con lo stesso giorno di ogni anno precedente.
@@ -68,7 +69,7 @@ Nessun framework e nessuna compilazione: è un sito statico che usa Firebase (pi
 
 - **Hosting:** Firebase Hosting su `granchio-blu.web.app`; l'accesso Google passa dallo stesso dominio, così funziona anche su iPhone.
 - **Accesso:** Firebase Authentication con Google.
-- **Dati:** Cloud Firestore (Milano, `europe-west8`), in `users/{uid}/uscite/{AAAA-MM-GG}` con giorno, chili e prezzo.
+- **Dati:** Cloud Firestore (Milano, `europe-west8`), in `users/{uid}/uscite/{AAAA-MM-GG}`, un documento per giorno: `kg` è il totale, `p` il prezzo medio e, se nel giorno ci sono più vendite, `t` è l'elenco delle vendite (`[{kg, p}]`).
 - **Pubblicazione:** ogni modifica caricata su `main` va online da sola con GitHub Actions, usando il segreto `FIREBASE_SERVICE_ACCOUNT_GRANCHIO_BLU`.
 - Per leggere e scrivere Excel in import si usa [SheetJS](https://sheetjs.com/), caricata solo quando serve.
 

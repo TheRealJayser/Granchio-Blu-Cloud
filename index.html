@@ -180,6 +180,16 @@ textarea{display:block;width:100%;min-height:110px;border:0;background:none;padd
 .tot{display:flex;justify-content:space-between;align-items:baseline;margin:14px 16px 0;color:var(--mute);font-size:15px}
 .tot b{color:var(--ink);font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
 .sheet .grp.del{margin-top:14px}
+/* vendite dello stesso giorno nella scheda di inserimento */
+.vend{margin-top:12px}
+.vend .vh{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--mute);text-transform:uppercase;letter-spacing:.02em;margin:0 16px 7px}
+.vend .vh b{white-space:nowrap;font-weight:600;text-transform:none;letter-spacing:0;font-variant-numeric:tabular-nums}
+.vrow{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;min-height:46px;padding:10px 16px;text-align:left;font-variant-numeric:tabular-nums;transition:background-color .2s}
+.vrow:active{background:var(--fill)}
+.vrow .x{color:var(--mute);font-size:14px;white-space:nowrap}
+.vrow.on{color:var(--tint-ink);font-weight:600}.vrow.on .x{color:var(--tint-ink)}
+.vend .grp{max-height:184px;overflow-y:auto}
+.vnote{font-size:13px;color:var(--mute);margin:7px 16px 0}
 
 /* avvisi e accesso */
 .toast{position:fixed;left:50%;top:calc(10px + var(--st));z-index:40;max-width:calc(100% - 32px);padding:11px 18px;border-radius:99px;background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);border:.5px solid var(--edge);box-shadow:0 8px 28px rgba(0,0,0,.18);font-size:15px;font-weight:600;text-align:center;transform:translate(-50%,-180%);transition:transform .55s var(--ease);pointer-events:none}
@@ -280,11 +290,12 @@ textarea{display:block;width:100%;min-height:110px;border:0;background:none;padd
   <div class="grp">
     <label class="frow"><span>Giorno</span><input type="date" id="fDate" required></label>
   </div>
+  <div class="vend" id="fVend" hidden></div>
   <div class="bigin">
     <label class="box"><span>Chili pescati</span><input id="fKg" inputmode="decimal" placeholder="0" autocomplete="off"><small>kg</small></label>
     <label class="box"><span>Prezzo pagato</span><input id="fPr" inputmode="decimal" placeholder="0,00" autocomplete="off"><small>€ al kg · se lo sai</small></label>
   </div>
-  <div class="tot"><span>Incasso del giorno</span><b id="fTot">0,00 €</b></div>
+  <div class="tot"><span id="fTotLbl">Incasso del giorno</span><b id="fTot">0,00 €</b></div>
   <div class="err" id="fErr" role="alert"></div>
   <div class="grp del" id="fDelWrap" hidden><button type="button" class="rbtn red" id="fDel" style="text-align:center">Elimina uscita</button></div>
 </form>
@@ -305,7 +316,7 @@ import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase
 import {getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,onAuthStateChanged,signOut} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,setDoc,deleteDoc,writeBatch,onSnapshot} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 {
-const VERSIONE='3.5';
+const VERSIONE='3.6';
 /* ---- Firebase ---- */
 // Su Firebase Hosting l'accesso passa dallo stesso dominio dell'app, così funziona anche su iPhone.
 const onFbHost=/\.(web\.app|firebaseapp\.com)$/.test(location.hostname);
@@ -352,9 +363,18 @@ let daysMode='d';
 let rows=new Map(), user=null, col=null, unsub=null, unsynced=false, yearSel=null, lastSaved=null, first=false;
 function valid(r){return r&&/^\d{4}-\d{2}-\d{2}$/.test(r.d)&&isFinite(r.kg)&&r.kg>0&&(r.p==null||isFinite(r.p))}
 const hasP=r=>r&&r.p!=null&&isFinite(r.p);
-const inc=r=>hasP(r)?r.kg*r.p:0;
+const r2=v=>Math.round(v*100)/100;
+// Un giorno può avere più vendite (parte del pescato venduta a un prezzo, parte a un altro): r.v=[{kg,p},...].
+// r.kg è il totale del giorno, r.p il prezzo medio delle vendite con prezzo, r.e l'incasso, r.kp i chili con prezzo.
+function mkDay(d,v){
+  v=v.filter(x=>x.kg>0);let k=0,e=0,kp=0;
+  v.forEach(x=>{k+=x.kg;if(x.p!=null){e+=x.kg*x.p;kp+=x.kg}});
+  return {d,kg:r2(k),p:kp?e/kp:null,v,e,kp};
+}
+const inc=r=>hasP(r)?(r.e!=null?r.e:r.kg*r.p):0;
+const kgP=r=>hasP(r)?(r.kp!=null?r.kp:r.kg):0;
 function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2400)}
-function sum(list){let k=0,e=0,kp=0;list.forEach(r=>{k+=r.kg;if(hasP(r)){e+=r.kg*r.p;kp+=r.kg}});return {k,e,n:list.length,avg:kp?e/kp:0}}
+function sum(list){let k=0,e=0,kp=0;list.forEach(r=>{k+=r.kg;if(hasP(r)){e+=inc(r);kp+=kgP(r)}});return {k,e,n:list.length,avg:kp?e/kp:0}}
 function sorted(){return [...rows.values()].sort((a,b)=>a.d<b.d?1:-1)}
 function years(){const s=new Set([...rows.keys()].map(d=>+d.slice(0,4)));s.add(new Date().getFullYear());return [...s].sort((a,b)=>b-a)}
 // riscrive un pezzo di pagina solo se è cambiato, così le animazioni non ripartono a vuoto
@@ -387,7 +407,9 @@ function heroTo(v){
   const step=t=>{const k=Math.min(1,(t-t0)/D),e=1-Math.pow(1-k,4);heroShown=from+(v-from)*e;paintHero(k<1?Math.round(heroShown):v);if(k<1)heroRaf=requestAnimationFrame(step);else heroShown=v};
   heroRaf=requestAnimationFrame(step);
 }
-function rowHtml(r,i){return `<div class="row${r.d===lastSaved?' flash':''}" data-d="${r.d}" role="button" tabindex="0" style="--i:${Math.min(i||0,10)}"><div class="l"><b>${wd(r.d)} ${nice(r.d)}</b>${hasP(r)?`<span>${nf2.format(r.p)} €/kg</span>`:''}</div><div class="r"><b>${kg(r.kg)}</b>${hasP(r)?`<span>${eur(inc(r))}</span>`:''}</div>${CHEV}</div>`}
+const nv=r=>r&&r.v?r.v.length:1;
+const pLine=r=>{const n=nv(r);if(n>1)return `<span>${n} vendite${hasP(r)?' · media '+nf2.format(r.p)+' €/kg':''}</span>`;return hasP(r)?`<span>${nf2.format(r.p)} €/kg</span>`:''};
+function rowHtml(r,i){return `<div class="row${r.d===lastSaved?' flash':''}" data-d="${r.d}" role="button" tabindex="0" style="--i:${Math.min(i||0,10)}"><div class="l"><b>${wd(r.d)} ${nice(r.d)}</b>${pLine(r)}</div><div class="r"><b>${kg(r.kg)}</b>${hasP(r)?`<span>${eur(inc(r))}</span>`:''}</div>${CHEV}</div>`}
 function bindRows(el){el.querySelectorAll('.row').forEach(n=>{const go=()=>openSheet(rows.get(n.dataset.d));n.onclick=go;n.onkeydown=e=>{if(e.key==='Enter')go()}})}
 
 function render(){
@@ -403,7 +425,7 @@ function render(){
   if(prev.k>0){const p=(c.k-prev.k)/prev.k*100;chip.hidden=false;chip.textContent=(p>=0?'+':'')+nf1.format(p)+'% rispetto al '+(Y-1)+' alla stessa data'}else chip.hidden=true;
 
   const td=rows.get(t),T=$('today');
-  if(td){setH(T,`<div class="stat3 tap" role="button" tabindex="0"><div><b>${numU(td.kg)}</b><span>${uLong()}</span></div><div><b>${hasP(td)?nf2.format(td.p):'—'}</b><span>€/kg</span></div><div><b>${hasP(td)?nf2.format(inc(td)):'—'}</b><span>€ incasso</span></div></div>`);T.onclick=()=>openSheet(rows.get(t))}
+  if(td){setH(T,`<div class="stat3 tap" role="button" tabindex="0"><div><b>${numU(td.kg)}</b><span>${uLong()}</span></div><div><b>${hasP(td)?nf2.format(td.p):'—'}</b><span>${nv(td)>1?'€/kg medio':'€/kg'}</span></div><div><b>${hasP(td)?nf2.format(inc(td)):'—'}</b><span>€ incasso</span></div></div>`);T.onclick=()=>openSheet(rows.get(t))}
   else{setH(T,'<div class="empty"><span>Nessun pescato inserito oggi</span><button class="pillbtn" type="button">Inserisci</button></div>');T.onclick=()=>openSheet()}
 
   const m0=monday(t),m1=addD(m0,-7),my=addD(m0,-364),off=(now.getDay()+6)%7;
@@ -523,7 +545,7 @@ function renderSet(){
     <p class="cap">Excel</p>
     <div class="grp"><button type="button" class="rbtn" id="xlExp">Esporta in Excel</button><label class="rbtn">Importa dal file dei conferimenti<input type="file" id="xlFile" accept=".xlsx,.xls,.xlsm,.ods,.csv"></label></div>
     <div class="err" id="xlExpErr"></div><div id="xlOut"></div>
-    <p class="ft">L'esportazione crea un file .xlsx con giorno, chili, prezzo al chilo e incasso (questi ultimi due solo nei giorni in cui hai inserito il prezzo), più la riga del totale. L'importazione legge la data (colonna B), descrMateriaPrima (J) e qtaQuota (S); prende tutte le righe tranne VONGOLE e SEMINAVONGOLE e somma quelle dello stesso giorno.</p>
+    <p class="ft">L'esportazione crea un file .xlsx con giorno, chili, prezzo al chilo e incasso (questi ultimi due solo dove hai inserito il prezzo), più la riga del totale. Se in un giorno ci sono più vendite, ognuna ha la sua riga. L'importazione legge la data (colonna B), descrMateriaPrima (J) e qtaQuota (S); prende tutte le righe tranne VONGOLE e SEMINAVONGOLE e somma quelle dello stesso giorno.</p>
     <p class="cap">Copia di sicurezza</p>
     <div class="grp"><button type="button" class="rbtn" id="cpBtn">Copia tutte le uscite come testo</button><div><textarea id="imTxt" placeholder='Incolla qui un backup, es. [{"d":"2025-06-12","kg":38.5,"p":6.2}]'></textarea></div><label class="rbtn">Scegli un file di backup<input type="file" id="imFile" accept=".json,.txt,application/json"></label><button type="button" class="rbtn" id="imBtn" style="font-weight:600">Importa il backup incollato</button></div>
     <div class="err" id="imErr"></div>
@@ -549,17 +571,19 @@ function renderSet(){
   $('xlExp').onclick=exportXlsx;
   $('xlFile').onchange=e=>{const f=e.target.files[0];if(f)readExcel(f)};
   $('cpBtn').onclick=async()=>{
-    const json=JSON.stringify(sorted().map(r=>({d:r.d,kg:r.kg,p:r.p})));
+    const json=JSON.stringify(sorted().flatMap(r=>r.v.map(x=>({d:r.d,kg:x.kg,p:x.p}))));
     try{await navigator.clipboard.writeText(json);toast('Backup copiato: incollalo in una nota o in una mail')}catch(e){$('imTxt').value=json;$('imTxt').select();toast('Seleziona e copia il testo a mano')}
   };
   $('imFile').onchange=async e=>{const f=e.target.files[0];if(f)$('imTxt').value=await f.text()};
   $('imBtn').onclick=async()=>{
     let a;try{a=JSON.parse($('imTxt').value)}catch(e){$('imErr').textContent='Il testo non è un backup valido.';return}
     if(!Array.isArray(a)){$('imErr').textContent='Il testo non è un backup valido.';return}
-    const ok=a.map(r=>({d:String(r.d),kg:+r.kg,p:r.p==null||r.p===''?null:+r.p})).filter(valid);
+    const ok=a.map(r=>({d:String(r&&r.d),kg:+(r&&r.kg),p:!r||r.p==null||r.p===''?null:+r.p})).filter(valid);
     if(!ok.length){$('imErr').textContent='Nel testo non ci sono uscite valide.';return}
-    await many(ok,'put');
-    $('imErr').textContent='';$('imTxt').value='';toast(usc(ok.length)+' importate');render();
+    // più righe con lo stesso giorno diventano più vendite di quel giorno
+    const g=new Map();ok.forEach(r=>{if(!g.has(r.d))g.set(r.d,[]);g.get(r.d).push({kg:r2(r.kg),p:r.p==null?null:r2(r.p)})});
+    await many([...g].map(([d,v])=>mkDay(d,v)),'put');
+    $('imErr').textContent='';$('imTxt').value='';toast(usc(g.size)+' importate');render();
   };
   const keys=()=>[...rows.keys()].sort().reverse();
   const cnt=p=>keys().filter(d=>d.startsWith(p)).length;
@@ -586,23 +610,47 @@ function renderSet(){
 }
 
 /* ---- inserimento ---- */
+// editing = {d,i}: si sta modificando la vendita i del giorno d; null = nuovo pescato (nuova vendita)
 let editing=null,delArm=false;
+function lastP(){for(const r of sorted())for(let i=r.v.length-1;i>=0;i--)if(r.v[i].p!=null)return r.v[i].p;return null}
+function sheetLabels(){
+  const r=rows.get($('fDate').value),many=r&&r.v.length>1,mine=editing&&r&&editing.d===r.d;
+  $('shTitle').textContent=editing?(many&&mine?'Modifica vendita':'Modifica uscita'):(r?'Altra vendita':'Nuovo pescato');
+  $('fTotLbl').textContent=r&&!(mine&&!many)?'Incasso di questa vendita':'Incasso del giorno';
+}
+// elenco delle vendite già inserite nel giorno scelto
+function vendList(){
+  const W=$('fVend'),d=$('fDate').value,r=rows.get(d),list=r?r.v:[],mine=!!(editing&&editing.d===d);
+  if(!list.length||(mine&&list.length===1)){W.hidden=true;W.innerHTML='';return}
+  W.hidden=false;
+  W.innerHTML=`<div class="vh"><span>${mine?'Vendite del giorno':'Già inserito'}</span><b>${kg(r.kg)}${hasP(r)?' · '+eur(inc(r)):''}</b></div>`+
+    `<div class="grp">${list.map((x,i)=>`<button type="button" class="vrow${mine&&editing.i===i?' on':''}" data-i="${i}"><span>${nf1.format(x.kg)} kg</span><span class="x">${x.p!=null?nf2.format(x.p)+' €/kg · '+eur(x.kg*x.p):'senza prezzo'}</span></button>`).join('')}`+
+    `${mine?'<button type="button" class="rbtn" id="fAddV">+ Aggiungi un\'altra vendita</button>':''}</div>`+
+    `<p class="vnote">${mine?'Tocca una vendita per modificarla.':'Quello che inserisci ora si aggiunge come altra vendita dello stesso giorno.'}</p>`;
+  W.querySelectorAll('.vrow').forEach(b=>b.onclick=()=>pick(d,+b.dataset.i));
+  const add=$('fAddV');if(add)add.onclick=()=>{pick(d,null);$('fKg').focus()};
+}
+// mette nei riquadri la vendita i del giorno d (i = null: nuova vendita)
+function pick(d,i){
+  const r=rows.get(d),x=i!=null&&r?r.v[i]:null;
+  editing=x?{d,i}:null;delArm=false;
+  $('fDate').value=d;
+  $('fKg').value=x?String(x.kg).replace('.',','):'';
+  const lp=lastP();$('fPr').value=x?(x.p!=null?nf2.format(x.p):''):(lp!=null?nf2.format(lp):'');
+  $('fDelWrap').hidden=!x;$('fDel').textContent=r&&r.v.length>1?'Elimina questa vendita':'Elimina uscita';$('fErr').textContent='';
+  sheetLabels();vendList();upTot();
+}
 function openSheet(r){
   if(!user)return;
-  editing=r||null;delArm=false;
-  $('shTitle').textContent=r?'Modifica uscita':'Nuovo pescato';
-  $('fDate').value=r?r.d:iso(new Date());
-  $('fKg').value=r?String(r.kg).replace('.',','):'';
-  const lp=sorted().find(hasP);$('fPr').value=r?(hasP(r)?nf2.format(r.p):''):(lp?nf2.format(lp.p):'');
-  $('fDelWrap').hidden=!r;$('fDel').textContent='Elimina uscita';$('fErr').textContent='';
-  upTot();$('scrim').classList.add('on');$('sheet').classList.add('on');
+  pick(r?r.d:iso(new Date()),r?0:null);
+  $('scrim').classList.add('on');$('sheet').classList.add('on');
   setTimeout(()=>$('fKg').focus(),350);
 }
 function closeSheet(){$('scrim').classList.remove('on');$('sheet').classList.remove('on');editing=null;if(document.activeElement&&$('sheet').contains(document.activeElement))document.activeElement.blur()}
 function upTot(){const k=num($('fKg').value),p=num($('fPr').value);$('fTot').textContent=eur(isFinite(k)&&isFinite(p)?k*p:0)}
 $('fKg').oninput=upTot;$('fPr').oninput=upTot;
-$('fDate').onchange=()=>{const ex=rows.get($('fDate').value);$('fErr').textContent=ex&&(!editing||editing.d!==ex.d)?'Esiste già un\'uscita in questo giorno: salvando la sostituisci.':''};
-$('addBtn').onclick=()=>{openSheet();$('fDate').onchange()};
+$('fDate').onchange=()=>{$('fErr').textContent='';sheetLabels();vendList()};
+$('addBtn').onclick=()=>openSheet();
 $('fCancel').onclick=closeSheet;$('scrim').onclick=closeSheet;
 addEventListener('keydown',e=>{if(e.key==='Escape'&&$('sheet').classList.contains('on'))closeSheet()});
 $('sheet').onsubmit=async e=>{
@@ -611,16 +659,25 @@ $('sheet').onsubmit=async e=>{
   if(!/^\d{4}-\d{2}-\d{2}$/.test(d)){$('fErr').textContent='Scegli il giorno.';return}
   if(!(k>0)){$('fErr').textContent='Inserisci i chili pescati.';return}
   if($('fPr').value.trim()&&!(p>=0)){$('fErr').textContent='Il prezzo non è un numero valido.';return}
-  const r={d,kg:Math.round(k*100)/100,p:p>=0?Math.round(p*100)/100:null};
+  const x={kg:r2(k),p:p>=0?r2(p):null};
   const old=editing;closeSheet();
   lastSaved=d;setTimeout(()=>{lastSaved=null},1600);
-  if(old&&old.d!==d)await del(old.d,true);
-  await put(r);toast('Salvato: '+kg(r.kg)+' il '+niceShort(d));
+  if(old){
+    const o=rows.get(old.d),v=o?o.v.slice():[];
+    if(old.d===d&&v[old.i]){v[old.i]=x;await put(mkDay(d,v));toast('Salvato: '+kg(x.kg)+' il '+niceShort(d));return}
+    // vendita spostata in un altro giorno: la tolgo da quello vecchio
+    if(v[old.i]){v.splice(old.i,1);if(v.length)await put(mkDay(old.d,v),true);else await del(old.d,true)}
+  }
+  const cur=rows.get(d),day=mkDay(d,cur?[...cur.v,x]:[x]);
+  await put(day);
+  toast(cur?'Vendita aggiunta · totale '+kg(day.kg):'Salvato: '+kg(x.kg)+' il '+niceShort(d));
 };
 $('fDel').onclick=async()=>{
   if(!delArm){delArm=Date.now();$('fDel').textContent='Tocca ancora per eliminare';return}
   if(Date.now()-delArm<800)return;
-  const d=editing.d;closeSheet();await del(d);toast('Uscita eliminata');
+  const {d,i}=editing,o=rows.get(d);closeSheet();
+  if(o&&o.v.length>1){const v=o.v.slice();v.splice(i,1);await put(mkDay(d,v));toast('Vendita eliminata')}
+  else{await del(d);toast('Uscita eliminata')}
 };
 // la scheda si chiude anche trascinandola verso il basso
 {let y0=null,dy=0;const sh=$('sheet'),h=$('shHead');
@@ -667,7 +724,7 @@ function buildXlsx(list){
 }
 async function exportXlsx(){
   const E=$('xlExpErr');E.textContent='';
-  const list=sorted().reverse();
+  const list=sorted().reverse().flatMap(r=>r.v.map(x=>({d:r.d,kg:x.kg,p:x.p}))); // una riga per ogni vendita
   if(!list.length){E.textContent='Non ci sono ancora dati da esportare.';return}
   let file;const name='granchio-blu-pescato-'+iso(new Date())+'.xlsx';
   try{file=new File(buildXlsx(list),name,{type:XTYPE})}catch(e){E.textContent='Non sono riuscito a creare il file. Riprova.';return}
@@ -725,20 +782,27 @@ async function readExcel(f){
   pend=[...agg.values()].map(r=>({d:r.d,kg:Math.round(r.kg*100)/100,p:null})).sort((a,b)=>a.d<b.d?-1:1);
   if(!found){O.innerHTML='<div class="err">Non trovo le colonne giuste: servono dataConferimento (B), descrMateriaPrima (J) e qtaQuota (S).</div>';return}
   if(!pend.length){O.innerHTML='<div class="err">Ho trovato le colonne ma nessuna riga (escluse le vongole) con data e chili validi.</div>';return}
-  const s=sum(pend),over=pend.filter(r=>rows.has(r.d)).length;
-  O.innerHTML=`<div class="grp xl"><div class="info"><b>${usc(pend.length)}</b> dal ${nice(pend[0].d)} al ${nice(pend[pend.length-1].d)} · ${kg(s.k)}<span>Tutte le righe tranne le vongole${skip?' · '+skip+' righe di vongole ignorate':''}<br>Fogli: ${esc(info.join(', '))}${over?' · '+gg(over)+' già presenti verranno sostituiti':''}</span></div><div class="two"><button class="rbtn" id="xlNo" type="button">Annulla</button><button class="rbtn b" id="xlGo" type="button">Importa</button></div></div>`;
+  const s=sum(pend),multi=pend.filter(r=>nv(rows.get(r.d))>1).length,over=pend.filter(r=>rows.has(r.d)).length-multi;
+  O.innerHTML=`<div class="grp xl"><div class="info"><b>${usc(pend.length)}</b> dal ${nice(pend[0].d)} al ${nice(pend[pend.length-1].d)} · ${kg(s.k)}<span>Tutte le righe tranne le vongole${skip?' · '+skip+' righe di vongole ignorate':''}<br>Fogli: ${esc(info.join(', '))}${over?' · '+gg(over)+' già presenti verranno sostituiti':''}${multi?' · '+gg(multi)+' con più vendite restano come sono':''}</span></div><div class="two"><button class="rbtn" id="xlNo" type="button">Annulla</button><button class="rbtn b" id="xlGo" type="button">Importa</button></div></div>`;
   const clear=()=>{pend=[];O.innerHTML='';$('xlFile').value=''};
   $('xlNo').onclick=clear;
   $('xlGo').onclick=async()=>{
     const list=pend;
-    await many(list.map(r=>{const o=rows.get(r.d);return hasP(o)?{...r,p:o.p}:r}),'put');
+    // i giorni con più vendite non si toccano; negli altri si tengono i chili del file e il prezzo già inserito
+    await many(list.filter(r=>nv(rows.get(r.d))<2).map(r=>{const o=rows.get(r.d);return mkDay(r.d,[{kg:r.kg,p:o&&o.v[0]?o.v[0].p:null}])}),'put');
     clear();render();toast(usc(list.length)+' importate');
   };
 }
 
 /* ---- salvataggio (Firestore: users/{uid}/uscite/{giorno}) ---- */
 // Le scritture non vengono attese: senza campo restano in coda sul telefono e partono appena torna la rete.
-function clean(r){return {d:r.d,kg:r.kg,p:hasP(r)?r.p:null}}
+// Un documento per giorno: kg = totale, p = prezzo medio (solo se tutte le vendite hanno il prezzo),
+// t = elenco delle vendite [{kg,p}], presente solo quando nel giorno ce n'è più di una.
+function clean(r){
+  const v=r.v||[{kg:r.kg,p:hasP(r)?r.p:null}],o={d:r.d,kg:r2(r.kg),p:v.every(x=>x.p!=null)&&hasP(r)?r2(r.p):null};
+  if(v.length>1)o.t=v.map(x=>({kg:x.kg,p:x.p==null?null:x.p}));
+  return o;
+}
 async function put(r,quiet){
   rows.set(r.d,r);if(!quiet)render();
   if(col)setDoc(doc(col,r.d),clean(r)).catch(fail);
@@ -803,7 +867,9 @@ onAuthStateChanged(auth,u=>{
   col=collection(fs,'users',u.uid,'uscite');
   status('Caricamento dei dati…');render();renderSet();first=true;
   unsub=onSnapshot(col,{includeMetadataChanges:true},snap=>{
-    const m=new Map();snap.forEach(d=>{const r=d.data();if(valid(r))m.set(r.d,{d:r.d,kg:r.kg,p:hasP(r)?r.p:null})});
+    const m=new Map();snap.forEach(d=>{const r=d.data();if(!valid(r))return;
+      const v=Array.isArray(r.t)?r.t.map(x=>({kg:+(x&&x.kg),p:x&&x.p!=null?+x.p:null})).filter(x=>isFinite(x.kg)&&x.kg>0&&(x.p==null||isFinite(x.p))):[];
+      m.set(r.d,mkDay(r.d,v.length?v:[{kg:r.kg,p:hasP(r)?r.p:null}]))});
     rows=m;unsynced=snap.metadata.hasPendingWrites;
     if(first){first=false;pager.classList.add('anim');setTimeout(()=>pager.classList.remove('anim'),1600)}
     render();status(syncNote(snap.metadata));
