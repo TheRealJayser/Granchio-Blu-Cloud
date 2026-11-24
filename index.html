@@ -96,6 +96,8 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .badge{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:99px;background:color-mix(in srgb,var(--tint) 16%,transparent);color:var(--tint-ink);font-size:12px;font-weight:600;vertical-align:2px}
 .mo{display:flex;justify-content:space-between;align-items:baseline;margin:24px 16px 8px;font-weight:700;font-size:20px}
 .mo span{color:var(--mute);font-weight:500;font-size:14px}
+.mo span{text-align:right;margin-left:10px}
+.mo span b{display:block;color:var(--ink);font-weight:600;font-size:15px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .chips{display:flex;gap:8px;overflow-x:auto;padding:2px 16px 14px;margin:0 -16px;scrollbar-width:none;overscroll-behavior-x:contain}
 .chip2{flex:none;height:34px;padding:0 16px;border-radius:17px;background:var(--fill);font-weight:600;font-size:15px;transition:background-color .25s,color .25s,transform .2s var(--ease)}
 .chip2:active{transform:scale(.93)}
@@ -322,7 +324,7 @@ import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase
 import {getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,onAuthStateChanged,signOut} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,setDoc,deleteDoc,writeBatch,onSnapshot} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 {
-const VERSIONE='3.7';
+const VERSIONE='3.8';
 /* ---- Firebase ---- */
 // Su Firebase Hosting l'accesso passa dallo stesso dominio dell'app, così funziona anche su iPhone.
 const onFbHost=/\.(web\.app|firebaseapp\.com)$/.test(location.hostname);
@@ -476,7 +478,7 @@ function renderDays(all){
   }else{
     const groups={};list.forEach(r=>(groups[r.d.slice(5,7)]=groups[r.d.slice(5,7)]||[]).push(r));
     h=`<div class="stat3"><div><b>${numU(s.k)}</b><span>${uLong()} nel ${yearSel}</span></div><div><b>${s.n}</b><span>uscite</span></div><div><b>${s.n?numU(s.k/s.n):'—'}</b><span>media ${uLab()}</span></div></div>`+money+
-      (list.length?Object.keys(groups).sort().reverse().map(m=>{const g=sum(groups[m]);return `<div class="mo">${Mese(+m-1)}<span>${kg(g.k)} · ${usc(g.n)}</span></div><div class="grp">${groups[m].map(rowHtml).join('')}</div>`}).join(''):'<div class="grp" style="margin-top:16px"><div class="none">Nessuna uscita in questo anno.</div></div>');
+      (list.length?Object.keys(groups).sort().reverse().map(m=>{const g=sum(groups[m]);return `<div class="mo">${Mese(+m-1)}<span>${kg(g.k)} · ${usc(g.n)}${g.e>0?'<b>'+eur(g.e)+'</b>':''}</span></div><div class="grp">${groups[m].map(rowHtml).join('')}</div>`}).join(''):'<div class="grp" style="margin-top:16px"><div class="none">Nessuna uscita in questo anno.</div></div>');
   }
   if(setH($('daysBody'),h))bindRows($('daysBody'));
 }

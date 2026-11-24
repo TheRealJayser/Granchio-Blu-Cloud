@@ -2,6 +2,11 @@
 
 Tutti gli aggiornamenti dell'app Granchio Blu (versione con accesso Google), dal più recente.
 
+## Versione 3.8 — 24 novembre 2026
+
+### Aggiunto
+- **Incasso del mese** nella sezione *Uscite*: accanto al nome di ogni mese, sotto chili e numero di uscite, compare l'incasso totale del mese (solo se nel mese ci sono uscite con il prezzo).
+
 ## Versione 3.7 — 24 novembre 2026
 
 ### Aggiunto
