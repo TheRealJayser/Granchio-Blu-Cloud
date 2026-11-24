@@ -21,10 +21,10 @@ Questa versione aggiunge l'**accesso con Google**: il pescato viene salvato onli
 - 📶 **Funziona anche senza campo** – senza rete l'app si apre e si può inserire il pescato: i dati partono da soli appena torna la connessione.
 - ➕ **Inserimento rapido** – il pulsante **+** apre un pannello con giorno, chili pescati e prezzo al chilo; l'incasso del giorno viene calcolato da solo.
 - 🧾 **Più vendite nello stesso giorno** – se parte del pescato va a un prezzo e parte a un altro, si inseriscono come vendite separate: il giorno mostra il totale dei chili e dell'incasso.
-- 📅 **Totale dell'anno** – i chili dal 1° gennaio a oggi, il numero di uscite, la media per uscita e la differenza rispetto all'anno precedente alla stessa data.
+- 📅 **Totale dell'anno** – i chili dal 1° gennaio a oggi, il numero di uscite, la media per uscita, l'incasso dell'anno con la media di guadagno a uscita e la differenza rispetto all'anno precedente alla stessa data.
 - 📆 **Questa settimana** – la settimana in corso a confronto con quella scorsa e con la stessa settimana dell'anno prima, «a pari giorno».
 - 🔁 **Lo stesso giorno negli anni** – il pescato di oggi messo a confronto con lo stesso giorno di ogni anno precedente.
-- 🗂️ **Uscite** – elenco giorno per giorno diviso per mese, oppure settimana per settimana.
+- 🗂️ **Uscite** – elenco giorno per giorno diviso per mese, oppure settimana per settimana, con il riepilogo dell'anno: chili, uscite, incasso, media in € a uscita e prezzo medio al chilo.
 - 📈 **Grafico degli anni** – i chili accumulati dall'inizio dell'anno, una linea per anno: si scorre col dito per leggere i valori.
 - 📊 **Excel** – esporta un file `.xlsx` con giorno, chili, prezzo e incasso; importa il file dei conferimenti (legge tutte le righe tranne *VONGOLE* e *SEMINAVONGOLE*, e somma più righe nello stesso giorno).
 - 🎨 **Grafica iOS e personalizzazione** – barra in basso a scorrimento, animazioni, tema automatico, chiaro o scuro e sei colori a scelta.

@@ -2,6 +2,13 @@
 
 Tutti gli aggiornamenti dell'app Granchio Blu (versione con accesso Google), dal più recente.
 
+## Versione 3.7 — 24 novembre 2026
+
+### Aggiunto
+- **Guadagno nella Home:** nel riquadro del totale dell'anno, sotto i chili, compaiono l'**incasso dell'anno** fino a oggi e la **media di guadagno a uscita**.
+- **Guadagno nella sezione Uscite:** sotto chili, uscite e media dell'anno c'è una seconda riga con **incasso**, **media in € a uscita** e **prezzo medio al chilo**, sia nella vista *Giorni* sia in *Settimane*.
+- Incasso e medie contano solo le uscite con il prezzo inserito; se alcune non ce l'hanno, l'app lo scrive.
+
 ## Versione 3.6 — 24 novembre 2026
 
 ### Aggiunto
